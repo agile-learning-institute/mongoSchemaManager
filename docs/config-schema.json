@@ -1,0 +1,59 @@
+{
+	"description": "SchemaManager Collection Configuration",
+	"type": "object",
+	"required": [
+		"name",
+		"versions"
+	],
+	"properties": {
+		"name": {
+			"description": "The collection name",
+			"type": "string"
+		},
+		"versions": {
+			"type": "array",
+			"items": {
+				"description": "A version of the collection",
+				"type": "object",
+				"required": [
+					"version"
+				],
+				"properties": {
+					"version": {
+						"description": "The Version Number",
+						"type": "string"
+					},
+					"prepare": {
+						"description": "The name of a migration prepare script",
+						"type": "string"
+					},
+					"indexes": {
+						"description": "The list of indexes",
+						"type": "object",
+						"required": [
+							"keys",
+							"options"
+						],
+						"properties": {
+							"keys": {
+								"description": "The index key fields",
+								"type": "object"
+							},
+							"options": {
+								"description": "The index options",
+								"type": "object"
+							}
+						},
+						"additionalProperties": false
+					},
+					"postfix": {
+						"description": "The name of a migration postfix script",
+						"type": "string"
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	},
+	"additionalProperties": false
+}
