@@ -2,15 +2,17 @@
 
 import config, collection 
 
-config = new Config()
+config = new Config() // Dependency injection object
 
 try {
     config.connect();
     for each collection yaml in config.getCollectionFolder() {
-        versionIndex = 0
-        while collection.getVersion() > collection.versions[versionIndex].version {versionIndex++}
-        for remaining version in collection.versions {
-            collection.configure(version)
+        log processing collection
+        for each version in collection {
+            log processing version
+            if collection.getVersionFromDb() < version.version {
+                collection.process(version)
+            }
         }
     }
 catch(e) {
