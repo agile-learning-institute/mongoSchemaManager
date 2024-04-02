@@ -1,4 +1,4 @@
-import { Config } from "./config";
+import { Config } from "../config/config";
 import { Version } from "./version"; // Now importing Version from a separate module
 import { readFileSync } from "fs";
 import { join } from "path";

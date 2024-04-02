@@ -1,4 +1,4 @@
-import { Version } from './version';
+import { Version } from '../../src/models/version';
 
 describe('Version', () => {
     let version: Version;

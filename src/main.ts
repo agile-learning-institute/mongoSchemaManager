@@ -1,5 +1,5 @@
-import { Config } from "./modules/config";
-import { Collection } from "./modules/collection";
+import { Config } from "./config/config";
+import { Collection } from "./models/collection";
 import { readdirSync } from "fs";
 import { join } from "path";
 

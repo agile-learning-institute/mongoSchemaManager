@@ -1,5 +1,5 @@
 import { MongoClient, Db } from 'mongodb';
-import { Config } from './config';
+import { Config } from '../config/config';
 import { Schema } from './schema';
 
 export class Version {

@@ -14,10 +14,9 @@ mongoSchemaManager is a **Containerized Configuration as Code** MongoDB Schema M
 ## Configuration Files and Folders
 - collections
 - enumerators
-- migrations
 - schemas
 - testData
-- types
+- customTypes
 
 ## Configuration Validation
 - validation tool

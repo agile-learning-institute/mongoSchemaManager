@@ -1,4 +1,4 @@
-import { Collection } from './collection';
+import { Collection } from '../../src/models/collection';
 
 describe('Collection', () => {
     let collection: Collection;
