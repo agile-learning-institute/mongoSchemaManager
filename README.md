@@ -1,4 +1,4 @@
-# schemaManager
+# mongoSchemaManager
 
 mongoSchemaManager is a **Containerized Configuration as Code** MongoDB Schema Management tool. This tool is designed to support the work of a data science engineer who is responsible for ensuring the quality of data captured and managed by a traditional CRUD based web applicaiton. The tool is designed with automated deployment in mind, and streamlines the job of ensuring data quality in a programming language agnostic manner. 
 
