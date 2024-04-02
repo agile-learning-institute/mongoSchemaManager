@@ -1,0 +1,14 @@
+{
+    "bsonType": "object",
+    "properties": {
+        "firstName": {
+            "description": "The persons first name",
+            "smType": "smWord"
+        },
+        "lastName": {
+            "description": "The persons last name",
+            "smType": "smWord"
+        }
+    },
+    "additionalProperties": false
+}

@@ -1,0 +1,50 @@
+{
+    "bsonType": "object",
+    "required": [
+        "_id",
+        "userName"
+    ],
+    "properties": {
+        "_id": {
+            "description": "The unique identifier for a person",
+            "bsonType": "objectId"
+        },
+        "name": {
+            "description": "VERSION document only",
+            "smType": "smWord"
+        },
+        "version": {
+            "description": "VERSION document only",
+            "smType": "smWord"
+        },
+        "userName": {
+            "description": "Username",
+            "smType": "smWord"
+        },
+        "fullName": {
+            "description": "Full Name",
+            "smType": "smSentence"
+        },
+        "status": {
+            "description": "The status of this member",
+            "smEnums": "peopleStatus"
+        },
+        "roles": {
+			"description": "RBAC Roles for this person",
+            "smEnumsList": "roles"
+        },
+        "eMail": {
+            "description": "The person's eMail address",
+            "smType": "smEmail"
+        },
+        "phone": {
+            "description": "The person's phone number",
+            "smType": "smPhone"
+        },
+        "lastSaved": {
+            "description": "Tracking breadcrumb",
+            "smType": "smBreadcrumb"
+        }
+    },
+    "additionalProperties": false
+}
