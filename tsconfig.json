@@ -106,6 +106,6 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*", "test/config/config.test.ts", "test/models/collection.test.ts", "test/models/schema.test.ts", "test/models/version.test.ts"],             // Include all files in the src directory
+  "include": ["src/test/**/*"],        // Include all files in the src/test directory
   "exclude": ["node_modules", "dist"]  // Exclude node_modules directory and dist directory from the source map
 }
