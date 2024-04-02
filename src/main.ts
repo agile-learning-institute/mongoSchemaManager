@@ -1,23 +1,29 @@
-# Main Process Psuedo Code
+import { Config } from "./modules/config";
+import { Collection } from "./modules/collection";
+import { readdirSync } from "fs";
+import { join } from "path";
 
-import config, collection 
+// Log starting
+console.log("Starting configuration and collection processing...");
 
-config = new Config() // Dependency injection object
+(async () => {
+  const config = new Config(); // Runtime Configurations
+  try {
+    await config.connect();
+    const configFolder = config.getConfigFolder();
+    const collectionFiles = readdirSync(configFolder).filter(file => file.endsWith('.json'));
 
-try {
-    config.connect();
-    for each collection yaml in config.getCollectionFolder() {
-        log processing collection
-        for each version in collection {
-            log processing version
-            if collection.getVersionFromDb() < version.version {
-                collection.process(version)
-            }
-        }
+    for (const fileName of collectionFiles) {
+      const filePath = join(configFolder, fileName);
+      const theCollection = new Collection(config, filePath);
+      await theCollection.processVersions();
     }
-catch(e) {
-    log e
-}
-finally {
-    config.disconnect()
-}
+  } catch (e) {
+    console.error(e);
+    await config.disconnect();
+    process.exit(1);
+  } finally {
+    await config.disconnect();
+  }
+  console.log("Processing completed.");
+})();
