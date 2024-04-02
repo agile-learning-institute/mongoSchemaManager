@@ -23,32 +23,42 @@
 						"description": "The Version Number",
 						"type": "string"
 					},
-					"prepare": {
-						"description": "The name of a migration prepare script",
-						"type": "string"
+					"dropIndexes": {
+						"description": "List of indexs to drop",
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
 					},
-					"indexes": {
-						"description": "The list of indexes",
-						"type": "object",
-						"required": [
-							"keys",
-							"options"
-						],
-						"properties": {
-							"keys": {
-								"description": "The index key fields",
-								"type": "object"
+					"aggregations": {
+						"description": "A list of migrations to run",
+						"type": "array",
+						"items": {
+							"description": "The migration pipeline",
+							"type": "object"
+						}
+					},
+					"addIndexes": {
+						"description": "List of indexes to Add",
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"keys",
+								"options"
+							],
+							"properties": {
+								"keys": {
+									"description": "The index key fields",
+									"type": "object"
+								},
+								"options": {
+									"description": "The index options",
+									"type": "object"
+								}
 							},
-							"options": {
-								"description": "The index options",
-								"type": "object"
-							}
-						},
-						"additionalProperties": false
-					},
-					"postfix": {
-						"description": "The name of a migration postfix script",
-						"type": "string"
+							"additionalProperties": false
+						}
 					}
 				},
 				"additionalProperties": false
