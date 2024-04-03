@@ -3,27 +3,27 @@ import { Config } from '../../src/config/config';
 describe('Config', () => {
     let config: Config;
 
-    beforeAll(async () => {
+    beforeAll(() => {
     });
 
-    afterAll(async () => {
+    afterAll(() => {
     });
 
-    test('test constructor', async () => {
+    test('test constructor', () => {
     });
 
-    test('test connect', async () => {
+    test('test connect', () => {
     });
 
-    test('test disconnect', async () => {
+    test('test disconnect', () => {
     });
 
-    test('test getCollection', async () => {
+    test('test getCollection', () => {
     });
 
-    test('test getDatabase', async () => {
+    test('test getDatabase', () => {
     });
 
-    test('test getConfigFolder', async () => {
+    test('test getConfigFolder', () => {
     });
 });

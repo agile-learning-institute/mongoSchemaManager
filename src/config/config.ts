@@ -15,13 +15,14 @@ export class Config {
     private client?: MongoClient;
     private db?: Db;
     private configFolder: string;
-    private loadTestData: boolean;
+    public LoadTestData: boolean;
+    public Enumerators: any;
 
     constructor() {
         this.configFolder = this.getConfigValue("CONFIG_FOLDER", "./config", false);
-        this.loadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
         this.connectionString = this.getConfigValue("CONNECTION_STRING", "", true);
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
+        this.LoadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
 
         console.log(JSON.stringify(this.configItems)); // Simple logging
     }
