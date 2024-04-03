@@ -5,20 +5,34 @@ describe('Config', () => {
 
     test('test constructor defaults', () => {
         let config = new Config();
+
         expect(config.getCollectionsFolder()).toBe("/opt/mongoSchemaManager/config/collections");
-        expect(config.getCustomTypesFolder()).toBe("/opt/mongoSchemaManager/config/customTypes");
-        expect(config.getSchemasFolder()).toBe("/opt/mongoSchemaManager/config/schemas");
-        expect(config.getTestDataFolder()).toBe("/opt/mongoSchemaManager/config/testData");
-        expect(config.getMsmTypesFolder()).toBe("/opt/mongoSchemaManager/msmTypes");
+        expect(config.getCustomTypesFile("foo")).toBe("/opt/mongoSchemaManager/config/customTypes/foo.json");
+        expect(config.getSchemasFile("foo","1.0.0")).toBe("/opt/mongoSchemaManager/config/schemas/foo-1.0.0.json");
+        expect(config.getTestDataFile("foo","1.0.0")).toBe("/opt/mongoSchemaManager/config/testData/foo-1.0.0.json");
         expect(config.shouldLoadTestData()).toBe(false);
     });
 
     test('test constructor environment and file', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         let config = new Config();
-        expect(config.getCollectionsFolder()).toBe("./test/resources/collections");
-        expect(config.getMsmTypesFolder()).toBe("./src/msmTypes");
-        expect(config.getEnumerators().enumerators.defaultStatus.Active).toBe("Not Deleted");
+        expect(config.getCollectionsFolder()).toBe("test/resources/collections");
+        expect(config.getTypeFile("msmWord")).toBe("src/msmTypes/msmWord.json");
+    });
+
+    test('test getEnums', () => {
+        process.env.CONFIG_FOLDER = "./test/resources";
+        let config = new Config();
+        expect(config.getEnums("defaultStatus").Active).toBe("Not Deleted");
+        expect(()=>config.getEnums("bad").Active).toThrow("Enumerator does not exist:bad");
+    });
+
+    test('test getTypeFile', () => {
+        process.env.CONFIG_FOLDER = "./test/resources";
+        let config = new Config();
+        expect(config.getTypeFile("msmWord")).toBe("src/msmTypes/msmWord.json");
+        expect(config.getTypeFile("fullName")).toBe("test/resources/customTypes/fullName.json");
+        expect(()=>config.getTypeFile("foo")).toThrow("Type Not Found:foo");
     });
 
     test('test getDatabase', async () => {

@@ -26,8 +26,9 @@ export class Config {
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
         this.loadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
 
-        if (existsSync(this.getEnumeratorsFileName())) {
-            this.enumerators = JSON.parse(readFileSync(this.getEnumeratorsFileName(), 'utf-8'))[0];
+        let enumeratorsFileName = join(this.configFolder, "enumerators", "enumerators.json");
+        if (existsSync(enumeratorsFileName)) {
+            this.enumerators = JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'))[0];
         } else {
             this.enumerators = {};
         }
@@ -65,32 +66,42 @@ export class Config {
         return this.db;
     }
 
-    public getEnumerators(): any {
-        return this.enumerators;
-    }
-
-    public getEnumeratorsFileName(): any {
-        return this.configFolder + "/enumerators/enumerators.json";
+    public getEnums(name: string): any {
+        if (this.enumerators.enumerators.hasOwnProperty(name)) {
+            return this.enumerators.enumerators[name];
+        } else {
+            throw new Error("Enumerator does not exist:" + name);
+        }
     }
 
     public getCollectionsFolder(): string {
-        return this.configFolder + "/collections";
+        return join(this.configFolder, "collections");
     }
 
-    public getCustomTypesFolder(): string {
-        return this.configFolder + "/customTypes";
+    public getTypeFile(type: string): string {
+        let typeFilename = join(this.msmTypesFolder, type + ".json");
+        if (existsSync(typeFilename)) {
+            return typeFilename;
+        }
+
+        typeFilename = join(this.configFolder, "customTypes", type + ".json") 
+        if (existsSync(typeFilename)) {
+            return typeFilename;
+        }
+
+        throw new Error("Type Not Found:" + type);
     }
 
-    public getSchemasFolder(): string {
-        return this.configFolder + "/schemas";
+    public getCustomTypesFile(type: string): string {
+        return join(this.configFolder, "customTypes", type + ".json");
     }
 
-    public getTestDataFolder(): string {
-        return this.configFolder + "/testData";
+    public getSchemasFile(collection: string, version: string): string {
+        return join(this.configFolder, "schemas", collection + "-" + version + ".json");
     }
 
-    public getMsmTypesFolder(): string {
-        return this.msmTypesFolder;
+    public getTestDataFile(collection: string, version: string): string {
+        return join(this.configFolder, "testData", collection + "-" + version + ".json");
     }
 
     public shouldLoadTestData(): boolean {
