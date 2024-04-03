@@ -11,39 +11,39 @@
         },
         "name": {
             "description": "VERSION document only",
-            "smType": "smWord"
+            "msmType": "msmWord"
         },
         "version": {
             "description": "VERSION document only",
-            "smType": "smWord"
+            "msmType": "msmWord"
         },
         "userName": {
             "description": "Username",
-            "smType": "smWord"
+            "msmType": "msmWord"
         },
         "firstName": {
             "description": "The persons first name",
-            "smType": "smWord"
+            "msmType": "msmWord"
         },
         "lastName": {
             "description": "The persons last name",
-            "smType": "smWord"
+            "msmType": "msmWord"
         },
         "status": {
             "description": "The status of this member",
-            "smEnums": "peopleStatus"
+            "msmEnums": "peopleStatus"
         },
         "roles": {
 			"description": "RBAC Roles for this person",
-            "smEnumsList": "roles"
+            "msmEnumsList": "roles"
         },
         "phone": {
             "description": "The person's phone number",
-            "smType": "smPhone"
+            "msmType": "msmPhone"
         },
         "lastSaved": {
             "description": "Tracking breadcrumb",
-            "smType": "smBreadcrumb"
+            "msmType": "msmBreadcrumb"
         }
     },
     "additionalProperties": false

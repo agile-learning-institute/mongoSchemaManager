@@ -8,6 +8,11 @@
                 "Active":"Not Deleted",
                 "Archived":"Soft Delete Indicator"
             },
+            "peopleStatus": {
+                "Draft": "Not yet active",
+                "Active":"Not Deleted",
+                "Archived":"Soft Delete Indicator"
+            },
             "promptType": {
                 "radio": "Select one option",
                 "check": "Select multiple options",

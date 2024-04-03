@@ -1,55 +1,70 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { Config } from "../config/config";
 
+/**
+ * This class is responsible for reading and pre-processing schema files
+ */
 export class Schema {
     private schema: any;
+    private config: Config;
 
-    constructor(filename: string, private basePath: string = "./") {
-        const schemaContent = readFileSync(filename, 'utf8');
-        this.schema = JSON.parse(schemaContent);
-        this.schema = this.preProcessMsmType(this.schema); // Process the entire schema recursively
+    constructor(config: Config, collection: string, version: string) {
+        const schemaFileName = config.getSchemasFile(collection, version);
+        this.config = config;
+        this.schema = JSON.parse(readFileSync(schemaFileName, 'utf8'));
+        this.schema.properties = this.preProcessMsmType(this.schema.properties); // Process the entire schema recursively
         this.preProcessMsmEnums();
         this.preProcessMsmEnumList();
+
+        console.log("INFO", "Schema For:" + schemaFileName, "Schema:" + JSON.stringify(this.schema)); 
     }
 
     public getSchema(): any {
         return this.schema;
     }
-
-    private preProcessMsmType(property: any): any {
-        if (property.hasOwnProperty('msmType')) {
-            const typeFilename = join(this.basePath, "types", `${property.msmType}.json`);
-            if (existsSync(typeFilename)) {
-                const typeContent = readFileSync(typeFilename, 'utf8');
+    /**
+     * This function recursively implements custom types that are 
+     * identified with an msmType property. msmType is replaced 
+     * with the contents of the custom type file.
+     * 
+     * @param property 
+     * @returns 
+     */
+    private preProcessMsmType(properties: any): any {
+        Object.keys(properties).forEach(key => {
+            // Check if the current property itself has 'msmType'
+            if (properties[key].hasOwnProperty('msmType')) {
+                let typeFilename = this.config.getTypeFile(properties[key].msmType);
+                const typeContent = readFileSync(typeFilename, 'utf-8');
                 const typeDefinition = JSON.parse(typeContent);
-                delete property.msmType; // Remove the msmType property
-                return Object.assign({}, property, this.preProcessMsmType(typeDefinition)); // Merge and recursively process
-            } else {
-                console.warn(`Type definition file for ${property.msmType} not found.`);
+                delete properties[key].msmType; // Remove the msmType property
+                Object.assign(properties[key], typeDefinition); // Merge and overwrite properties
             }
-        } else if (property.type === 'object' && property.properties) {
-            Object.keys(property.properties).forEach(key => {
-                property.properties[key] = this.preProcessMsmType(property.properties[key]);
-            });
-        } else if (property.type === 'array' && property.items) {
-            property.items = this.preProcessMsmType(property.items);
-        }
-        return property;
+    
+            // If the property type is 'object', recurse on its 'properties'
+            if (properties[key].type === 'object' && properties[key].properties) {
+                properties[key].properties = this.preProcessMsmType(properties[key].properties);
+            }
+    
+            // If the property type is 'array' and its items are of type 'object', recurse on the 'items' 'properties'
+            if (properties[key].type === 'array' && properties[key].items && properties[key].items.type === 'object' && properties[key].items.properties) {
+                properties[key].items.properties = this.preProcessMsmType(properties[key].items.properties);
+            }
+        });
+    
+        return properties;
     }
-
+    
     private preProcessMsmEnums(): void {
         Object.keys(this.schema.properties).forEach(key => {
             const property = this.schema.properties[key];
             if (property.hasOwnProperty('msmEnums')) {
                 const enumName = property.msmEnums;
-                const enumValues = this.enumsConfig[enumName];
-                if (enumValues) {
-                    delete property.msmEnums; // Remove the msmEnums property
-                    property.bsonType = "string"; // Set the type to string for enums
-                    property.enum = Object.keys(enumValues); // Set enum keys as possible values
-                } else {
-                    console.warn(`Enum definition for ${enumName} not found.`);
-                }
+                const enumValues = this.config.getEnums(enumName);
+                delete property.msmEnums;
+                property.bsonType = "string"; 
+                property.enum = Object.keys(enumValues);
             }
         });
     }
@@ -58,18 +73,13 @@ export class Schema {
         Object.keys(this.schema.properties).forEach(key => {
             const property = this.schema.properties[key];
             if (property.hasOwnProperty('msmEnumList')) {
-                const enumName = property.msmEnumList;
-                const enumValues = this.enumsConfig[enumName];
-                if (enumValues) {
-                    delete property.msmEnumList; // It seems you want to keep it, but here it's removed after processing
-                    property.bsonType = "array";
-                    property.items = {
-                        bsonType: "string",
-                        enum: Object.keys(enumValues)
-                    };
-                } else {
-                    console.warn(`Enum list definition for ${enumName} not found.`);
-                }
+                const enumValues = this.config.getEnums(property.msmEnumList);
+                delete property.msmEnumList; 
+                property.bsonType = "array";
+                property.items = {
+                    bsonType: "string",
+                    enum: Object.keys(enumValues)
+                };
             }
         });
     }
