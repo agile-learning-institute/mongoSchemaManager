@@ -17,7 +17,7 @@ export class Schema {
         this.preProcessMsmEnums();
         this.preProcessMsmEnumList();
 
-        console.log("INFO", "Schema For:" + schemaFileName, "Schema:" + JSON.stringify(this.schema)); 
+        console.log("INFO", "Schema For Collection:" + collection, "Version:" + version, "Schema:" + JSON.stringify(this.schema)); 
     }
 
     public getSchema(): any {
@@ -55,7 +55,11 @@ export class Schema {
     
         return properties;
     }
-    
+
+    /**
+     * This function processes msmEnums Directives in schema, 
+     * by adding the corresponding values from the system enumerators 
+     */
     private preProcessMsmEnums(): void {
         Object.keys(this.schema.properties).forEach(key => {
             const property = this.schema.properties[key];
@@ -69,6 +73,11 @@ export class Schema {
         });
     }
 
+    /**
+     * This function processes msmEnumList Directives in schema, 
+     * by adding an array of strings, with enums values from the 
+     * system enumerators 
+     */
     private preProcessMsmEnumList(): void {
         Object.keys(this.schema.properties).forEach(key => {
             const property = this.schema.properties[key];
