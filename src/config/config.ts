@@ -14,15 +14,23 @@ export class Config {
     private dbName: string;
     private client?: MongoClient;
     private db?: Db;
-    private configFolder: string;
-    public LoadTestData: boolean;
-    public Enumerators: any;
+    private configFolder: string = "";
+    private msmTypesFolder: string;
+    private loadTestData: boolean;
+    private enumerators: any;
 
     constructor() {
-        this.configFolder = this.getConfigValue("CONFIG_FOLDER", "./config", false);
-        this.connectionString = this.getConfigValue("CONNECTION_STRING", "", true);
+        this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/config", false);
+        this.msmTypesFolder = this.getConfigValue("MSM_TYPES", "/opt/mongoSchemaManager/msmTypes", false);
+        this.connectionString = this.getConfigValue("CONNECTION_STRING", "mongodb://root:example@localhost:27017", true);
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
-        this.LoadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
+        this.loadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
+
+        if (existsSync(this.getEnumeratorsFileName())) {
+            this.enumerators = JSON.parse(readFileSync(this.getEnumeratorsFileName(), 'utf-8'))[0];
+        } else {
+            this.enumerators = {};
+        }
 
         console.log(JSON.stringify(this.configItems)); // Simple logging
     }
@@ -31,11 +39,15 @@ export class Config {
         this.client = new MongoClient(this.connectionString);
         await this.client.connect();
         this.db = this.client.db(this.dbName);
+
+        // load enumerators from mongodb enumerators collection.
     }
 
     public async disconnect(): Promise<void> {
         if (this.client) {
             await this.client.close();
+            this.client = undefined;
+            this.db = undefined;
         }
     }
 
@@ -53,8 +65,36 @@ export class Config {
         return this.db;
     }
 
-    public getConfigFolder(): string {
-        return this.configFolder;
+    public getEnumerators(): any {
+        return this.enumerators;
+    }
+
+    public getEnumeratorsFileName(): any {
+        return this.configFolder + "/enumerators/enumerators.json";
+    }
+
+    public getCollectionsFolder(): string {
+        return this.configFolder + "/collections";
+    }
+
+    public getCustomTypesFolder(): string {
+        return this.configFolder + "/customTypes";
+    }
+
+    public getSchemasFolder(): string {
+        return this.configFolder + "/schemas";
+    }
+
+    public getTestDataFolder(): string {
+        return this.configFolder + "/testData";
+    }
+
+    public getMsmTypesFolder(): string {
+        return this.msmTypesFolder;
+    }
+
+    public shouldLoadTestData(): boolean {
+        return this.loadTestData;
     }
 
     private getConfigValue(name: string, defaultValue: string, isSecret: boolean): string {
