@@ -2,54 +2,78 @@ import { MongoClient, Db } from 'mongodb';
 import { Config } from '../config/config';
 import { Schema } from './schema';
 
+/**
+ * This class is responsible for implementing a Version of a collection.
+ */
 export class Version {
     private config: Config;
     private collection: string;
-    private version: string = "";
-    private dropIndexes: string[] = [];
-    private aggregations: object[] = [];
-    private addIndexes: object[] = [];
+    private version: string;
+    private dropIndexes?: string[] = [];
+    private aggregations?: object[] = [];
+    private addIndexes?: object[] = [];
+    private testData?: string;
+    private schema: any;
 
-    constructor(config: Config, collection: string, versionData: string) {
+    constructor(config: Config, collection: string, theVersion: any) {
         this.config = config;
         this.collection = collection;
-        const data = JSON.parse(versionData);
-        this.version = data.version;
-        this.dropIndexes = data.dropIndexes;
-        this.aggregations = data.aggregations;
-        this.addIndexes = data.addIndexes;
+        this.version = theVersion.verison;
+        Object.assign(this, theVersion);
+
+        const schemaFileName = config.getSchemasFile(this.collection, this.version);
+        const schemaProcessor = new Schema(config, this.collection, this.version);
+        this.schema = schemaProcessor.getSchema();
     }
 
     public getVersion(): string {
         return this.version;
     }
     
-    public async apply(db: Db): Promise<void> {
-        const collection = db.collection(this.collection);
+    public getSchema(): any {
+        return this.schema;
+    }
+    
+    public getThis(): any {
+        return this;
+    }
 
-        // Drop schema validation (assuming MongoDB command)
+    public async apply(): Promise<void> {
+        // Setup mongo collection
+
+        // Drop schema validation
 
         // Drop indexes
-        for (const indexName of this.dropIndexes) {
-            await collection.dropIndex(indexName);
+        if (this.dropIndexes) {
+            for (const indexName of this.dropIndexes) {
+                // Drop Index
+            }
         }
 
         // Execute Aggregations
-        for (const aggregation of this.aggregations) {
-            await collection.aggregate(aggregation).toArray(); // Simplified example
+        if (this.aggregations) {
+            for (const aggregation of this.aggregations) {
+                // Execute aggretation pipeline
+            }
         }
 
         // Add Indexes
-        for (const index of this.addIndexes) {
-            await collection.createIndex(index.keys, index.options);
+        if (this.addIndexes) {
+            for (const index of this.addIndexes) {
+                // add index
+            }
         }
 
-        // Integrate Schema for validation or updates
-        const schemaFilePath = this.config.getConfigFolder() + `/schemas/${this.collection}_${this.version}.json`;
-        const schema = new Schema(schemaFilePath);
-        const processedSchema = schema.getSchema();
+        // Apply Schema
+        // apply ths.schema
+
+        // Load Test Data
+        if (this.config.shouldLoadTestData() && (this.testData)) {
+            const dataFile = this.config.getTestDataFile(this.testData);
+            // bulk load data file
+        }
 
         // Update VERSION document
-        await collection.updateOne({ name: 'VERSION' }, { $set: { version: this.version } }, { upsert: true });
+        // mongo upsert {"name": "VERSIN", "verison": version}
     }
 }
