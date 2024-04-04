@@ -8,6 +8,9 @@ interface ConfigItem {
     from: string;
 }
 
+/**
+ * This class manages backing services and environment based configurations
+ */
 export class Config {
     private configItems: ConfigItem[] = []; 
     private connectionString: string;
@@ -33,7 +36,7 @@ export class Config {
             this.enumerators = {};
         }
 
-        console.log(JSON.stringify(this.configItems)); // Simple logging
+        console.log("INFO", "Configuration Initilized:", JSON.stringify(this.configItems)); 
     }
 
     public async connect(): Promise<void> {
@@ -100,8 +103,8 @@ export class Config {
         return join(this.configFolder, "schemas", collection + "-" + version + ".json");
     }
 
-    public getTestDataFile(collection: string, version: string): string {
-        return join(this.configFolder, "testData", collection + "-" + version + ".json");
+    public getTestDataFile(filename: string): string {
+        return join(this.configFolder, "testData", filename + ".json");
     }
 
     public shouldLoadTestData(): boolean {
