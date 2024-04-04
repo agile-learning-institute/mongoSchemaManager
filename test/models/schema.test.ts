@@ -2,9 +2,8 @@ import { Config } from '../../src/config/config';
 import { Schema } from '../../src/models/schema';
 
 describe('Schema', () => {
-    let schema: Schema;
 
-    test('test msmTypes', async () => {
+    test('test msmTypes', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         let config = new Config();
         let schemaLoader = new Schema(config, "people", "1.0.0");
@@ -15,7 +14,7 @@ describe('Schema', () => {
         expect(schema["properties"]["name"]["pattern"]).toBe("^[^\\s]{0,32}$");
     });
 
-    test('test msmEnum', async () => {
+    test('test msmEnum', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         let config = new Config();
         let schemaLoader = new Schema(config, "people", "2.0.0");
@@ -26,7 +25,7 @@ describe('Schema', () => {
         expect(schema["properties"]["status"]["enum"]).toBeInstanceOf(Array);
     });
 
-    test('get msmEnumList', async () => {
+    test('get msmEnumList', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         let config = new Config();
         let schemaLoader = new Schema(config, "people", "2.0.0");
