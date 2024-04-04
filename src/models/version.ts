@@ -1,6 +1,5 @@
-import { MongoClient, Db } from 'mongodb';
-import { Config } from '../config/config';
-import { Schema } from './schema';
+import { Config } from '../config/Config';
+import { Schema } from './Schema';
 
 /**
  * This class is responsible for implementing a Version of a collection.
@@ -13,7 +12,7 @@ export class Version {
     private aggregations?: object[] = [];
     private addIndexes?: object[] = [];
     private testData?: string;
-    private schema: any;
+    private theSchema: any;
 
     constructor(config: Config, collection: string, theVersion: any) {
         this.config = config;
@@ -21,59 +20,44 @@ export class Version {
         this.version = theVersion.verison;
         Object.assign(this, theVersion);
 
-        const schemaFileName = config.getSchemasFile(this.collection, this.version);
         const schemaProcessor = new Schema(config, this.collection, this.version);
-        this.schema = schemaProcessor.getSchema();
+        this.theSchema = schemaProcessor.getSchema();
     }
 
-    public getVersion(): string {
-        return this.version;
-    }
-    
-    public getSchema(): any {
-        return this.schema;
-    }
-    
+    // Generic getter for testing
     public getThis(): any {
         return this;
     }
 
     public async apply(): Promise<void> {
-        // Setup mongo collection
-
-        // Drop schema validation
+        this.config.clearSchemaValidation(this.version);
 
         // Drop indexes
         if (this.dropIndexes) {
-            for (const indexName of this.dropIndexes) {
-                // Drop Index
-            }
+            this.config.dropIndexes(this.dropIndexes);
         }
 
         // Execute Aggregations
         if (this.aggregations) {
-            for (const aggregation of this.aggregations) {
-                // Execute aggretation pipeline
-            }
+            this.config.executeAggregations(this.aggregations);
         }
 
         // Add Indexes
         if (this.addIndexes) {
-            for (const index of this.addIndexes) {
-                // add index
-            }
+            this.config.addIndexes(this.addIndexes);
         }
 
-        // Apply Schema
-        // apply ths.schema
+        this.config.applySchemaValidation(this.collection, this.theSchema);
 
         // Load Test Data
         if (this.config.shouldLoadTestData() && (this.testData)) {
-            const dataFile = this.config.getTestDataFile(this.testData);
-            // bulk load data file
+            this.config.bulkLoad(this.collection, this.testData)
         }
 
-        // Update VERSION document
-        // mongo upsert {"name": "VERSIN", "verison": version}
+        this.config.setVersion(this.collection, this.version)
+    }
+
+    public getVersion() {
+        return this.version;
     }
 }

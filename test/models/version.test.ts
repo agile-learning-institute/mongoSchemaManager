@@ -1,20 +1,68 @@
-import { Config } from '../../src/config/config';
-import { Version } from '../../src/models/version';
+import { Config } from '../../src/config/Config';
+import { Version } from '../../src/models/Version';
+
+jest.mock('../../src/config/Config', () => {
+    return {
+        Config: jest.fn().mockImplementation(() => ({
+            clearSchemaValidation: jest.fn(),
+            dropIndexes: jest.fn(),
+            executeAggregations: jest.fn(),
+            addIndexes: jest.fn(),
+            applySchemaValidation: jest.fn(),
+            shouldLoadTestData: jest.fn().mockReturnValue(true), 
+            bulkLoad: jest.fn(),
+            setVersion: jest.fn(),
+        }))
+    };
+});
+
+jest.mock('../../src/models/Schema', () => {
+    return {
+        Schema: jest.fn().mockImplementation(() => ({
+            getSchema: jest.fn().mockReturnValue({
+                "bsonType": "object",
+                "properties": {
+                    "name": {
+                        "description": "aDescription",
+                        "bsonType": "string",
+                        "pattern": "foo",
+                    }
+                }
+            }),
+        }))
+    };
+});
 
 describe('Version', () => {
-
+    let config: Config;
+    let version: Version;
+  
+    beforeEach(() => {
+      // Clear all mocks before each test
+      jest.clearAllMocks();
+  
+      // Instantiate Config and Version for testing
+      config = new Config();
+      version = new Version(config, 'testCollection', {
+        version: '1.0.0',
+        dropIndexes: ['index1', 'index2'],
+        aggregations: [{ /* Mock aggregation */ }],
+        addIndexes: [{ /* Mock index */ }],
+        testData: 'testData',
+      });
+  
+    });
+  
     test('test constructor simple', () => {
-        process.env.CONFIG_FOLDER = "./test/resources";
         const config = new Config();
         const version = { "version": "1.0.0" }
         const theVersion = new Version(config, "people", version);
 
-        expect(theVersion.getVersion()).toBe("1.0.0");
-        expect(theVersion.getSchema()["properties"]["name"]["description"]).toBe("VERSION document only");
+        expect(theVersion.getThis().version).toBe("1.0.0");
+        expect(theVersion.getThis().theSchema["properties"]["name"]["description"]).toBe("aDescription");
     });
 
     test('test constructor testData', () => {
-        process.env.CONFIG_FOLDER = "./test/resources";
         const config = new Config();
         const version = {
             "version": "1.0.0",
@@ -27,11 +75,10 @@ describe('Version', () => {
     });
 
     test('test constructor dropIndexes', () => {
-        process.env.CONFIG_FOLDER = "./test/resources";
         const config = new Config();
         const version = {
             "version": "1.0.0",
-            "dropIndexes": ["foo","bar"]
+            "dropIndexes": ["foo", "bar"]
         };
         const theVersion = new Version(config, "people", version);
 

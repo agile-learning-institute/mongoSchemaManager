@@ -1,6 +1,4 @@
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
-import { Config } from "../config/config";
+import { Config } from "../config/Config";
 
 /**
  * This class is responsible for reading and pre-processing schema files
@@ -10,9 +8,8 @@ export class Schema {
     private config: Config;
 
     constructor(config: Config, collection: string, version: string) {
-        const schemaFileName = config.getSchemasFile(collection, version);
         this.config = config;
-        this.schema = JSON.parse(readFileSync(schemaFileName, 'utf8'));
+        this.schema = this.config.getSchema(collection, version);
         this.schema.properties = this.preProcessMsmType(this.schema.properties); // Process the entire schema recursively
         this.preProcessMsmEnums();
         this.preProcessMsmEnumList();
@@ -35,9 +32,7 @@ export class Schema {
         Object.keys(properties).forEach(key => {
             // Check if the current property itself has 'msmType'
             if (properties[key].hasOwnProperty('msmType')) {
-                let typeFilename = this.config.getTypeFile(properties[key].msmType);
-                const typeContent = readFileSync(typeFilename, 'utf-8');
-                const typeDefinition = JSON.parse(typeContent);
+                const typeDefinition = this.config.getType(properties[key].msmType);
                 delete properties[key].msmType; // Remove the msmType property
                 Object.assign(properties[key], typeDefinition); // Merge and overwrite properties
             }

@@ -1,5 +1,5 @@
 import { MongoClient, Db } from 'mongodb';
-import { readFileSync, existsSync } from 'fs';
+import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
 
 interface ConfigItem {
@@ -9,7 +9,8 @@ interface ConfigItem {
 }
 
 /**
- * This class manages backing services and environment based configurations
+ * This class manages configuration values from the enviornment (or files) and
+ * abstracts all file i-o as well as all mongodb calls.
  */
 export class Config {
     private configItems: ConfigItem[] = []; 
@@ -33,7 +34,7 @@ export class Config {
         if (existsSync(enumeratorsFileName)) {
             this.enumerators = JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'))[0];
         } else {
-            this.enumerators = {};
+            this.enumerators = {"enumerators":{}};
         }
 
         console.log("INFO", "Configuration Initilized:", JSON.stringify(this.configItems)); 
@@ -43,8 +44,55 @@ export class Config {
         this.client = new MongoClient(this.connectionString);
         await this.client.connect();
         this.db = this.client.db(this.dbName);
+    }
 
-        // load enumerators from mongodb enumerators collection.
+    public getDatabase(): Db {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        return this.db;
+    }
+
+    public getCollection(collectionName: string) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        return this.db.collection(collectionName);
+    }
+
+    public async getVersion(collectionName: string): Promise<string> {
+        let version = "";
+        const collection = this.getCollection(collectionName);
+        const versionDocument = await collection.findOne({ name: "VERSION" });
+        return versionDocument ? versionDocument.version : "0.0.0";
+    }
+
+    public async clearSchemaValidation(collection: string) {
+        // TODO
+    }
+
+    public async dropIndexes(names: string[]) {
+        // TODO
+    }
+
+    public async executeAggregations(aggregations: any) {
+        // TODO
+    }
+
+    public async addIndexes(indexes: any[]) {
+        // TODO
+    }
+
+    public async applySchemaValidation(collection: string, schema: any) {
+        // TODO
+    }
+
+    public async bulkLoad(collection: string, dataFile: string) {
+        // TODO
+    }
+
+    public async setVersion(collection: string, version: string) {
+        // TODO UpSert Version Doc
     }
 
     public async disconnect(): Promise<void> {
@@ -55,20 +103,6 @@ export class Config {
         }
     }
 
-    public getCollection(collectionName: string) {
-        if (!this.db) {
-            throw new Error("Database not connected");
-        }
-        return this.db.collection(collectionName);
-    }
-
-    public getDatabase(): Db {
-        if (!this.db) {
-            throw new Error("Database not connected");
-        }
-        return this.db;
-    }
-
     public getEnums(name: string): any {
         if (this.enumerators.enumerators.hasOwnProperty(name)) {
             return this.enumerators.enumerators[name];
@@ -77,34 +111,50 @@ export class Config {
         }
     }
 
-    public getCollectionsFolder(): string {
-        return join(this.configFolder, "collections");
-    }
-
-    public getTypeFile(type: string): string {
-        let typeFilename = join(this.msmTypesFolder, type + ".json");
-        if (existsSync(typeFilename)) {
-            return typeFilename;
+    public getCollectionFiles(): string[] {
+        const collectionsFolder = join(this.configFolder, "collections");
+        const collectionFiles = readdirSync(collectionsFolder).filter(file => file.endsWith('.json'));
+        if (!Array.isArray(collectionFiles)) {
+            return [];
         }
+        return collectionFiles;
+    }
 
-        typeFilename = join(this.configFolder, "customTypes", type + ".json") 
-        if (existsSync(typeFilename)) {
-            return typeFilename;
+    public getCollectionConfig(fileName: string): any {
+        const filePath = join(this.configFolder, "collections", fileName );
+        return JSON.parse(readFileSync(filePath, 'utf-8'));
+    }
+
+    public getType(type: string): any {
+        let typeFilename: string;
+        typeFilename = join(this.msmTypesFolder, type + ".json");
+        if (!existsSync(typeFilename)) {
+            typeFilename = join(this.configFolder, "customTypes", type + ".json") 
+            if (!existsSync(typeFilename)) {
+                throw new Error("Type Not Found:" + type);
+            }
         }
-
-        throw new Error("Type Not Found:" + type);
+        const typeContent = readFileSync(typeFilename, 'utf-8');
+        return JSON.parse(typeContent);
     }
 
-    public getCustomTypesFile(type: string): string {
-        return join(this.configFolder, "customTypes", type + ".json");
+    public getSchema(collection: string, version: string): any {
+        const schemaFileName = join(this.configFolder, "schemas", collection + "-" + version + ".json");
+        return JSON.parse(readFileSync(schemaFileName, 'utf8'));
+
     }
 
-    public getSchemasFile(collection: string, version: string): string {
-        return join(this.configFolder, "schemas", collection + "-" + version + ".json");
+    public getTestData(filename: string): any {
+        let filePath = join(this.configFolder, "testData", filename + ".json");
+        return JSON.parse(readFileSync(filePath, 'utf8'));
     }
 
-    public getTestDataFile(filename: string): string {
-        return join(this.configFolder, "testData", filename + ".json");
+    public getConfigFolder(): string {
+        return this.configFolder;
+    }
+
+    public getMsmTypesFolder(): string {
+        return this.msmTypesFolder;
     }
 
     public shouldLoadTestData(): boolean {

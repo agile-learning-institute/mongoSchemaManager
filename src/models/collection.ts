@@ -1,5 +1,5 @@
-import { Config } from "../config/config";
-import { Version } from "./version"; // Now importing Version from a separate module
+import { Config } from "../config/Config";
+import { Version } from "./Version"; 
 
 interface CollectionConfig {
     collectionName: string;
@@ -24,18 +24,13 @@ export class Collection {
     }
 
     public async processVersions() {
-        this.currentVersion = await this.getVersion();
+        this.currentVersion = await this.config.getVersion(this.collectionName);
         for (const version of this.versions) {
             if (version.getVersion() > this.currentVersion) {
                 version.apply();
-                this.currentVersion = await this.getVersion();
+                this.currentVersion = await this.config.getVersion(this.collectionName);
             }
         }
-    }
-
-    public async getVersion(): Promise<string> {
-        const versionDocument = await this.config.getCollection(this.collectionName).findOne({ name: "VERSION" });
-        return versionDocument ? versionDocument.version : "0.0.0";
     }
 
     public getCurrentVersion(): string {

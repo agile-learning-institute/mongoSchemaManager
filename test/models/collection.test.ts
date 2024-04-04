@@ -1,5 +1,5 @@
-import { Config } from '../../src/config/config';
-import { Collection } from '../../src/models/collection';
+import { Config } from '../../src/config/Config';
+import { Collection } from '../../src/models/Collection';
 
 // Setup for mocking MongoDB findOne
 const findOneMock = jest.fn();
@@ -21,9 +21,7 @@ jest.mock("../../src/config/config", () => {
     return {
         Config: jest.fn().mockImplementation(() => {
             return {
-                getCollection: jest.fn().mockReturnValue({
-                    findOne: findOneMock
-                })
+                getVersion: jest.fn().mockReturnValue("0.0.0"),
             };
         })
     };
@@ -46,9 +44,6 @@ describe('Collection', () => {
     });
 
     test('test process', async () => {
-        // Mock the response of findOne to simulate getting the current version from the database
-        findOneMock.mockResolvedValue({ version: "0.9.0" });
-
         const config = new Config();
         const collectionConfig = {
             collectionName: "testCollection",
@@ -58,7 +53,8 @@ describe('Collection', () => {
         const collection = new Collection(config, collectionConfig);
         expect(collection.getCurrentVersion()).toBe("");
         await collection.processVersions();
-        expect(collection.getCurrentVersion()).toBe("0.9.0");
+        expect(collection.getCurrentVersion()).toBe("0.0.0");
+        expect(config.getVersion).toHaveBeenCalledTimes(2);    
     });
 
 });
