@@ -9,7 +9,7 @@ describe('Config', () => {
         expect(config.getCollectionsFolder()).toBe("/opt/mongoSchemaManager/config/collections");
         expect(config.getCustomTypesFile("foo")).toBe("/opt/mongoSchemaManager/config/customTypes/foo.json");
         expect(config.getSchemasFile("foo","1.0.0")).toBe("/opt/mongoSchemaManager/config/schemas/foo-1.0.0.json");
-        expect(config.getTestDataFile("foo","1.0.0")).toBe("/opt/mongoSchemaManager/config/testData/foo-1.0.0.json");
+        expect(config.getTestDataFile("foo-1.0.0")).toBe("/opt/mongoSchemaManager/config/testData/foo-1.0.0.json");
         expect(config.shouldLoadTestData()).toBe(false);
     });
 
