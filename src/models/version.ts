@@ -51,7 +51,10 @@ export class Version {
 
         // Load Test Data
         if (this.config.shouldLoadTestData() && (this.testData)) {
-            this.config.bulkLoad(this.collection, this.testData)
+            this.config.bulkLoad(
+                this.collection, 
+                this.config.getTestData(this.testData)
+            );
         }
 
         this.config.setVersion(this.collection, this.version)

@@ -1,3 +1,8 @@
+/**
+ * Class Config: This class manages configuration values 
+ *      from the enviornment or configuration files, 
+ *      and abstracts all file and mongodb i-o.
+ */
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
@@ -8,10 +13,6 @@ interface ConfigItem {
     from: string;
 }
 
-/**
- * This class manages configuration values from the enviornment (or files) and
- * abstracts all file i-o as well as all mongodb calls.
- */
 export class Config {
     private configItems: ConfigItem[] = []; 
     private connectionString: string;
@@ -87,7 +88,7 @@ export class Config {
         // TODO
     }
 
-    public async bulkLoad(collection: string, dataFile: string) {
+    public async bulkLoad(collection: string, data: any[]) {
         // TODO
     }
 
