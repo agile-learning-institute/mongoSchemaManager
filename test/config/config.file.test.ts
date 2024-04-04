@@ -1,6 +1,6 @@
 /**
- * NOTE: This set of unit tests requires a mongodb and uses the 
- *       testing data in the test/resources folder of this repo.
+ * NOTE: This set of unit tests uses the testing data 
+ *       in the test/resources folder of this repo.
  */
 import { Config } from '../../src/config/Config';
 
