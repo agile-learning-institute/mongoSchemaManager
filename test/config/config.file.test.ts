@@ -3,6 +3,7 @@
  *       in the test/resources folder of this repo.
  */
 import { Config } from '../../src/config/Config';
+import { VersionNumber } from '../../src/models/VersionNumber';
 
 describe('Config', () => {
     let config: Config;
@@ -27,8 +28,8 @@ describe('Config', () => {
     });
 
     test('test getEnums', () => {
-        expect(config.getEnums("defaultStatus").Active).toBe("Not Deleted");
-        expect(() => config.getEnums("bad").Active).toThrow("Enumerator does not exist:bad");
+        expect(config.getEnums(1, "defaultStatus").Active).toBe("Not Deleted");
+        expect(() => config.getEnums(0, "bad")).toThrow("Enumerator does not exist:bad");
     });
 
     test('test getCollectionFiles', () => {
@@ -53,7 +54,7 @@ describe('Config', () => {
     });
 
     test('test getSchema', () => {
-        const schema = config.getSchema("people", "1.0.0");
+        const schema = config.getSchema("people", new VersionNumber("1.0.0.0"));
         expect(schema.bsonType).toBe("object");
     });
 

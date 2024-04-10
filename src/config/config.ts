@@ -6,6 +6,7 @@
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
+import { VersionNumber } from '../models/VersionNumber';
 
 interface ConfigItem {
     name: string;
@@ -33,7 +34,7 @@ export class Config {
 
         let enumeratorsFileName = join(this.configFolder, "enumerators", "enumerators.json");
         if (existsSync(enumeratorsFileName)) {
-            this.enumerators = JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'))[0];
+            this.enumerators = JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'));
         } else {
             this.enumerators = {"enumerators":{}};
         }
@@ -62,10 +63,9 @@ export class Config {
     }
 
     public async getVersion(collectionName: string): Promise<string> {
-        let version = "";
         const collection = this.getCollection(collectionName);
         const versionDocument = await collection.findOne({ name: "VERSION" });
-        return versionDocument ? versionDocument.version : "0.0.0";
+        return versionDocument ? versionDocument.version : "0.0.0.0";
     }
 
     public async clearSchemaValidation(collection: string) {
@@ -92,7 +92,7 @@ export class Config {
         // TODO
     }
 
-    public async setVersion(collection: string, version: string) {
+    public async setVersion(collection: string, versionString: string) {
         // TODO UpSert Version Doc
     }
 
@@ -104,9 +104,12 @@ export class Config {
         }
     }
 
-    public getEnums(name: string): any {
-        if (this.enumerators.enumerators.hasOwnProperty(name)) {
-            return this.enumerators.enumerators[name];
+    public getEnums(version: number, name: string): any {
+        if (this.enumerators[version].version != version) {
+            throw new Error("Invalid Enumerators File bad version number sequence")
+        }
+        if (this.enumerators[version].enumerators.hasOwnProperty(name)) {
+            return this.enumerators[version].enumerators[name];
         } else {
             throw new Error("Enumerator does not exist:" + name);
         }
@@ -139,10 +142,9 @@ export class Config {
         return JSON.parse(typeContent);
     }
 
-    public getSchema(collection: string, version: string): any {
-        const schemaFileName = join(this.configFolder, "schemas", collection + "-" + version + ".json");
+    public getSchema(collection: string, version: VersionNumber): any {
+        const schemaFileName = join(this.configFolder, "schemas", collection + "-" + version.getShortVersionString() + ".json");
         return JSON.parse(readFileSync(schemaFileName, 'utf8'));
-
     }
 
     public getTestData(filename: string): any {
