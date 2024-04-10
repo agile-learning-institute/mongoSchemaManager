@@ -1,8 +1,47 @@
 [
     {
         "name": "Enumerations",
+        "status": "Depricated",
+        "version": 0,
+        "enumerators": []
+    },
+    {
+        "name": "Enumerations",
         "status": "Active",
-        "version": "1.0.0",
+        "version": 1,
+        "enumerators": {
+            "defaultStatus": {
+                "Active":"Not Deleted",
+                "Archived":"Soft Delete Indicator"
+            },
+            "peopleStatus": {
+                "Draft": "Not yet active",
+                "Active":"Not Deleted",
+                "Archived":"Soft Delete Indicator"
+            },
+            "promptType": {
+                "radio": "Select one option",
+                "check": "Select multiple options",
+                "text": "Enter a text string"
+            },
+            "promptOptions": {
+                "one": "Option 1",
+                "two": "Option 2",
+                "three": "Optionno 3"
+            },
+            "roles": {
+                "Member": "A member",
+                "Mentor": "A mentor",
+                "Partner": "A partner contact",
+                "Donor": "A donor or supporter",
+                "Staff": "A member of staff"
+            }
+        }
+    },
+    {
+        "name": "Enumerations",
+        "status": "Active",
+        "version": 2,
         "enumerators": {
             "defaultStatus": {
                 "Active":"Not Deleted",
