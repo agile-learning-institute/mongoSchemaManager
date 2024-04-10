@@ -22,14 +22,15 @@ describe('Config', () => {
     afterEach(async () => {
         await config.dropCollection(collectionName);
         await config.disconnect()
-    });
-
-    test('test getCollection', async () => {
-        expect(collection.collectionName).toBe(collectionName);
+        console.log("After Each is Running");
     });
 
     test('test getDatabase', async () => {
         expect(db.databaseName).toBe("test");
+    });
+
+    test('test getCollection', async () => {
+        expect(config.getCollection(collectionName).collectionName).toBe(collectionName);
     });
 
     test('test set/getVersion', async () => {
@@ -72,24 +73,48 @@ describe('Config', () => {
     });
 
     test('test add/drop indexes', async () => {
-        let indexes: {}[] = [{"TO":"DO"}];
-        let names: {}[] = [{"TO":"DO"}];
+        let indexes: {}[] = [
+            {
+                "name": "nameIndex",
+                "keys": { "userName": 1 },
+                "options": { "unique": true }
+            }, {
+                "name": "typeIndex",
+                "keys": { "type": 1 },
+                "options": { "unique": false }
+            }
+        ];
+        let names: string[] = ["nameIndex", "typeIndex"];
 
         config.addIndexes(collectionName, indexes);
         let appliedIndexes = config.getIndexes(collectionName);
         expect(appliedIndexes).toStrictEqual(indexes);
 
-        config.dropIndexes(names);
+        config.dropIndexes(collectionName, names);
         appliedIndexes = config.getIndexes(collectionName);
         expect(appliedIndexes).toStrictEqual([]);
     });
 
     test('test aexecuteAggregations', async () => {
-        const aggregations = {"TO":"DO"};
-        const expectedOutput = {"TO":"DO"};
+        const document = { "firstName": "Foo", "lastName": "Bar" };
+        const expectedOutput = { "name": "Foo Bar" };
+        const aggregations = [
+            {
+                $addFields: {
+                    name: {
+                        $concat: ["$firstName", " ", "$lastName"]
+                    }
+                }
+            }, {
+                $unset: ["firstName", "lastName"]
+            }, {
 
+            }
+        ];
+
+        db.collection(collectionName).insertOne(document);
         config.executeAggregations(collectionName, aggregations);
-        const result = {}; // mongodb get results
+        const result = db.collection(collectionName).findOne();
         expect(result).toStrictEqual(expectedOutput);
     });
 

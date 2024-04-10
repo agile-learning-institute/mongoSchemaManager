@@ -39,7 +39,7 @@ export class Config {
             this.enumerators = {"enumerators":{}};
         }
 
-        console.log("INFO", "Configuration Initilized:", JSON.stringify(this.configItems)); 
+        console.info("Configuration Initilized:", JSON.stringify(this.configItems)); 
     }
 
     public async connect(): Promise<void> {
@@ -62,16 +62,35 @@ export class Config {
         return this.db.collection(collectionName);
     }
 
-    public async dropCollection(name: string) {
+    public async dropCollection(collectionName: string) {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+        const success = await this.db.collection(collectionName).drop();
+        if (!success) {
+            throw new Error("Drop Collection Failed!");
+        }
     }
 
+    public async setVersion(collectionName: string, versionString: string) {
+        if (!this.db) {
+            throw new Error("config.setVersion - Database not connected");
+        }
+        const versionDocument = { name: "VERSION", version: versionString };
+        const filter = { name: "VERSION" };
+        const update = { $set: versionDocument };
+        const options = { upsert: true };
+    
+        await this.getCollection(collectionName).updateOne(filter, update, options);
+        console.info("Version set or updated in collection", collectionName, "to", versionString);
+        }
+
     public async getVersion(collectionName: string): Promise<string> {
-        const collection = this.getCollection(collectionName);
-        const versionDocument = await collection.findOne({ name: "VERSION" });
+        if (!this.db) {
+            throw new Error("config.getVersion - Database not connected");
+        }
+        const versionDocument = await this.getCollection(collectionName).findOne({ name: "VERSION" });
+        console.info("getVersion from collection", collectionName, "found", JSON.stringify(versionDocument));
         return versionDocument ? versionDocument.version : "0.0.0.0";
     }
 
@@ -124,20 +143,15 @@ export class Config {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+        const result = await this.db.collection(collectionName).aggregate(aggregations).toArray();
+        console.info("Executed: ", aggregations, "Result", result);
     }
 
-    public async bulkLoad(collection: string, data: any[]) {
+    public async bulkLoad(collectionName: string, data: any[]) {
         if (!this.db) {
             throw new Error("Database not connected");
         }
         // TODO
-    }
-
-    public async setVersion(collection: string, versionString: string) {
-        if (this.client) {
-            // TODO UpSert Version Doc
-        }
     }
 
     public async disconnect(): Promise<void> {
