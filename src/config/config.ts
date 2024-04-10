@@ -62,38 +62,82 @@ export class Config {
         return this.db.collection(collectionName);
     }
 
+    public async dropCollection(name: string) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        // TODO
+    }
+
     public async getVersion(collectionName: string): Promise<string> {
         const collection = this.getCollection(collectionName);
         const versionDocument = await collection.findOne({ name: "VERSION" });
         return versionDocument ? versionDocument.version : "0.0.0.0";
     }
 
-    public async clearSchemaValidation(collection: string) {
+    public async applySchemaValidation(collectionName: string, schema: any) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
         // TODO
     }
 
-    public async dropIndexes(names: string[]) {
+    public async getSchemaValidation(collectionName: string): Promise<any> {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        // TODO
+        // let collectionDetails = await db.command({ listCollections: 1, filter: { name: collectionName } });
+        // let validationRules = collectionDetails?.collections[0]?.options?.validator || {};
+        return {};
+    }
+
+    public async clearSchemaValidation(collectionName: string) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
         // TODO
     }
 
-    public async executeAggregations(aggregations: any) {
+    public async addIndexes(collectionName: string, indexes: any[]) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
         // TODO
     }
 
-    public async addIndexes(indexes: any[]) {
+    public async getIndexes(collectionName: string) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        return this.db.collection(collectionName).indexes();
+    }
+
+    public async dropIndexes(collectionName: string, names: string[]) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
         // TODO
     }
 
-    public async applySchemaValidation(collection: string, schema: any) {
+    public async executeAggregations(collectionName: string, aggregations: any) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
         // TODO
     }
 
     public async bulkLoad(collection: string, data: any[]) {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
         // TODO
     }
 
     public async setVersion(collection: string, versionString: string) {
-        // TODO UpSert Version Doc
+        if (this.client) {
+            // TODO UpSert Version Doc
+        }
     }
 
     public async disconnect(): Promise<void> {

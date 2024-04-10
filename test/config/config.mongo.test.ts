@@ -3,104 +3,100 @@
  * You can run a mongo container with the following command
  * docker run -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=example --detach mongo:latest
  */
+import { Collection, Db } from 'mongodb';
 import { Config } from '../../src/config/Config';
 
 describe('Config', () => {
     let config: Config;
     let collectionName = "testCollection";
+    let db: Db;
+    let collection: Collection;
 
     beforeEach(async () => {
         config = new Config();
         await config.connect();
+        db = config.getDatabase();
+        collection = config.getCollection(collectionName);
     });
 
     afterEach(async () => {
+        await config.dropCollection(collectionName);
         await config.disconnect()
     });
 
-    afterAll(async () => {
-        // config.getDatabase.DROP COLLECTION collectionName
-    });
-
     test('test getCollection', async () => {
-        let collection = config.getCollection(collectionName);
         expect(collection.collectionName).toBe(collectionName);
     });
 
     test('test getDatabase', async () => {
-        let db = config.getDatabase();
         expect(db.databaseName).toBe("test");
     });
 
     test('test set/getVersion', async () => {
         let theVersion = await config.getVersion(collectionName);
-        expect(theVersion).toBe("0.0.0");
+        expect(theVersion).toBe("0.0.0.0");
 
-        await config.setVersion(collectionName, "1.2.3");
+        await config.setVersion(collectionName, "1.2.3.4");
         theVersion = await config.getVersion(collectionName);
-        expect(theVersion).toBe("1.2.3");
+        expect(theVersion).toBe("1.2.3.4");
 
-        await config.setVersion(collectionName, "2.2.2");
+        await config.setVersion(collectionName, "2.2.2.2");
         theVersion = await config.getVersion(collectionName);
-        expect(theVersion).toBe("2.2.2");
+        expect(theVersion).toBe("2.2.2.2");
     });
 
     test('test apply/remove schema validation', async () => {
-        let applyedSchema = {};
-        let schema = {
-            "bsonType": "object",
-            "properties": {
-                "name": {
-                    "description": "Name Description",
-                    "bsonType": "string",
+        const schema = {
+            bsonType: "object",
+            properties: {
+                name: {
+                    description: "Name Description",
+                    bsonType: "string",
                 }
             }
         };
 
+        // Apply schema validation
         config.applySchemaValidation(collectionName, schema);
-        applyedSchema = {}; // mongodb get schema
-        expect(applyedSchema).toStrictEqual(schema);
 
+        // Get the applied schema
+        let appliedSchema = await config.getSchemaValidation(collectionName);
+        expect(appliedSchema).toStrictEqual(schema);
+
+        // Clear schema validation
         config.clearSchemaValidation(collectionName);
-        applyedSchema = {}; // mongodb get schema
-        expect(applyedSchema).toStrictEqual({});
+
+        // Verify schema validation is cleared
+        appliedSchema = await config.getSchemaValidation(collectionName);
+        expect(appliedSchema).toStrictEqual({});
     });
 
     test('test add/drop indexes', async () => {
-        let appliedIndexes = [];
-        let indexes = [
+        let indexes: {}[] = [{"TO":"DO"}];
+        let names: {}[] = [{"TO":"DO"}];
 
-        ];
-        let names = [
-
-        ];
-
-        config.addIndexes(indexes);
-        appliedIndexes = []; // mongodb get indexes
+        config.addIndexes(collectionName, indexes);
+        let appliedIndexes = config.getIndexes(collectionName);
         expect(appliedIndexes).toStrictEqual(indexes);
 
         config.dropIndexes(names);
-        appliedIndexes = []; // mongodb get indexes
+        appliedIndexes = config.getIndexes(collectionName);
         expect(appliedIndexes).toStrictEqual([]);
     });
 
     test('test aexecuteAggregations', async () => {
-        const aggregations = {
+        const aggregations = {"TO":"DO"};
+        const expectedOutput = {"TO":"DO"};
 
-        };
-        const expectedOutput = {
-
-        };
-
-        config.executeAggregations(aggregations);
+        config.executeAggregations(collectionName, aggregations);
         const result = {}; // mongodb get results
         expect(result).toStrictEqual(expectedOutput);
     });
 
     test('test bulkLoad', async () => {
-        const testData = [];
+        const testData: any[] = ["TODO"];
         config.bulkLoad(collectionName, testData);
-        const result = []; //mongodb get all
+        const result: any[] = []; //mongodb get all
         expect(result).toStrictEqual(testData);
     });
 });
