@@ -1,10 +1,20 @@
 import { Config } from '../../src/config/Config';
 import { Version } from '../../src/models/Version';
+import { VersionNumber } from '../../src/models/VersionNumber';
 
 jest.mock('../../src/config/Config', () => {
     return {
         Config: jest.fn().mockImplementation(() => ({
             clearSchemaValidation: jest.fn(),
+            getSchema: jest.fn().mockReturnValue({
+                "bsonType": "object",
+                "properties": {
+                    "name": {
+                        "description": "aDescription",
+                        "msmType": "msmWord"
+                    }
+                }
+            }),
             dropIndexes: jest.fn(),
             executeAggregations: jest.fn(),
             addIndexes: jest.fn(),
@@ -25,74 +35,59 @@ jest.mock('../../src/models/Schema', () => {
                     "name": {
                         "description": "aDescription",
                         "bsonType": "string",
-                        "pattern": "foo",
                     }
                 }
-            }),
+            })
         }))
     };
 });
 
 describe('Version', () => {
     let config: Config;
-    let version: Version;
+    const expectedVersion = new VersionNumber("1.0.0.0");
   
     beforeEach(() => {
-      // Clear all mocks before each test
       jest.clearAllMocks();
-  
-      // Instantiate Config and Version for testing
       config = new Config();
-      version = new Version(config, 'testCollection', {
-        version: '1.0.0',
-        dropIndexes: ['index1', 'index2'],
-        aggregations: [{ /* Mock aggregation */ }],
-        addIndexes: [{ /* Mock index */ }],
-        testData: 'testData',
-      });
-  
     });
   
     test('test constructor simple', () => {
-        const config = new Config();
-        const version = { "version": "1.0.0" }
-        const theVersion = new Version(config, "people", version);
+        const versionData = {"version": "1.0.0.0"};
+        const theVersion = new Version(config, "people", versionData);
 
-        expect(theVersion.getThis().version).toBe("1.0.0");
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().theSchema["properties"]["name"]["description"]).toBe("aDescription");
     });
 
-    test('test constructor testData', () => {
-        const config = new Config();
-        const version = {
-            "version": "1.0.0",
+    test('test testData', () => {
+        const versionData = {
+            "version": "1.0.0.0",
             "testData": "somefilename"
         };
-        const theVersion = new Version(config, "people", version);
+        const theVersion = new Version(config, "people", versionData);
 
-        expect(theVersion.getVersion()).toBe("1.0.0");
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().testData).toBe("somefilename");
     });
 
-    test('test constructor dropIndexes', () => {
-        const config = new Config();
-        const version = {
-            "version": "1.0.0",
+    test('test dropIndexes', () => {
+        const versionData = {
+            "version": "1.0.0.0",
             "dropIndexes": ["foo", "bar"]
         };
-        const theVersion = new Version(config, "people", version);
+        const theVersion = new Version(config, "people", versionData);
 
-        expect(theVersion.getVersion()).toBe("1.0.0");
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().dropIndexes.length).toBe(2);
         expect(theVersion.getThis().dropIndexes[0]).toBe("foo");
         expect(theVersion.getThis().dropIndexes[1]).toBe("bar");
     });
 
-    test('test constructor addIndexes', () => {
+    test('test addIndexes', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         const config = new Config();
         const version = {
-            "version": "1.0.0",
+            "version": "1.0.0.0",
             "addIndexes": [
                 {
                     "keys": { "userName": 1 },
@@ -106,17 +101,17 @@ describe('Version', () => {
         };
         const theVersion = new Version(config, "people", version);
 
-        expect(theVersion.getVersion()).toBe("1.0.0");
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().addIndexes.length).toBe(2);
         expect(theVersion.getThis().addIndexes[0].keys).toStrictEqual({ "userName": 1 });
         expect(theVersion.getThis().addIndexes[1].keys).toStrictEqual({ "status": 1 });
     });
 
-    test('test constructor aggregations', () => {
+    test('test aggregations', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         const config = new Config();
-        const version = {
-            "version": "1.0.0",
+        const versionData = {
+            "version": "1.0.0.0",
             "aggregations": [
                 [
                     { "$match": "match1" },
@@ -128,9 +123,9 @@ describe('Version', () => {
                 ]
             ]
         };
-        const theVersion = new Version(config, "people", version);
+        const theVersion = new Version(config, "people", versionData);
 
-        expect(theVersion.getVersion()).toBe("1.0.0");
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().aggregations.length).toBe(2);
         expect(theVersion.getThis().aggregations[0][0].$match).toBe("match1");
         expect(theVersion.getThis().aggregations[1][0].$match).toBe("match2");

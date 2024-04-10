@@ -1,5 +1,6 @@
 import { Config } from '../config/Config';
 import { Schema } from './Schema';
+import { VersionNumber } from './VersionNumber';
 
 /**
  * This class is responsible for implementing a Version of a collection.
@@ -7,7 +8,7 @@ import { Schema } from './Schema';
 export class Version {
     private config: Config;
     private collection: string;
-    private version: string;
+    private versionNumber: VersionNumber;
     private dropIndexes?: string[] = [];
     private aggregations?: object[] = [];
     private addIndexes?: object[] = [];
@@ -17,10 +18,10 @@ export class Version {
     constructor(config: Config, collection: string, theVersion: any) {
         this.config = config;
         this.collection = collection;
-        this.version = theVersion.verison;
+        this.versionNumber = new VersionNumber(theVersion.version);
         Object.assign(this, theVersion);
 
-        const schemaProcessor = new Schema(config, this.collection, this.version);
+        const schemaProcessor = new Schema(config, this.collection, this.versionNumber);
         this.theSchema = schemaProcessor.getSchema();
     }
 
@@ -30,7 +31,7 @@ export class Version {
     }
 
     public async apply(): Promise<void> {
-        this.config.clearSchemaValidation(this.version);
+        this.config.clearSchemaValidation(this.collection);
 
         // Drop indexes
         if (this.dropIndexes) {
@@ -57,10 +58,10 @@ export class Version {
             );
         }
 
-        this.config.setVersion(this.collection, this.version)
+        this.config.setVersion(this.collection, this.versionNumber.getVersionString())
     }
 
-    public getVersion() {
-        return this.version;
+    public getVersion(): VersionNumber {
+        return this.versionNumber;
     }
 }
