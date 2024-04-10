@@ -26,7 +26,7 @@ export class Collection {
     public async processVersions() {
         this.currentVersion = await this.config.getVersion(this.collectionName);
         for (const version of this.versions) {
-            if (version.getVersion() > this.currentVersion) {
+            if (version.getVersion().isGreaterThan(this.currentVersion)) {
                 version.apply();
                 this.currentVersion = await this.config.getVersion(this.collectionName);
             }
