@@ -1,5 +1,6 @@
 import { Config } from '../../src/config/Config';
 import { Schema } from '../../src/models/Schema';
+import { VersionNumber } from '../../src/models/VersionNumber';
 
 // Mock the Config class
 jest.mock('../../src/config/Config', () => ({
@@ -12,6 +13,7 @@ jest.mock('../../src/config/Config', () => ({
 
 describe('Schema', () => {
     let configMock: jest.Mocked<Config>; 
+    const v1 = new VersionNumber("1.0.0.0");
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -46,7 +48,7 @@ describe('Schema', () => {
         configMock.getSchema.mockReturnValue(schemaInput);
         configMock.getType.mockReturnValue(typeInput);
 
-        let schemaLoader = new Schema(configMock, "people", "1.0.0");
+        let schemaLoader = new Schema(configMock, "people", v1);
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });
@@ -82,7 +84,7 @@ describe('Schema', () => {
         configMock.getSchema.mockReturnValue(schemaInput);
         configMock.getEnums.mockReturnValue(enums);
 
-        let schemaLoader = new Schema(configMock, "people", "1.0.0");
+        let schemaLoader = new Schema(configMock, "people", v1);
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });
@@ -121,7 +123,7 @@ describe('Schema', () => {
         configMock.getSchema.mockReturnValue(schemaInput);
         configMock.getEnums.mockReturnValue(enums);
 
-        let schemaLoader = new Schema(configMock, "people", "1.0.0");
+        let schemaLoader = new Schema(configMock, "people", v1);
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });

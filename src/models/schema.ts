@@ -1,4 +1,5 @@
 import { Config } from "../config/Config";
+import { VersionNumber } from "./VersionNumber";
 
 /**
  * This class is responsible for reading and pre-processing schema files
@@ -6,9 +7,11 @@ import { Config } from "../config/Config";
 export class Schema {
     private schema: any;
     private config: Config;
+    private version: VersionNumber;
 
-    constructor(config: Config, collection: string, version: string) {
+    constructor(config: Config, collection: string, version: VersionNumber) {
         this.config = config;
+        this.version = version;
         this.schema = this.config.getSchema(collection, version);
         this.schema.properties = this.preProcessMsmType(this.schema.properties); // Process the entire schema recursively
         this.preProcessMsmEnums();
@@ -60,7 +63,7 @@ export class Schema {
             const property = this.schema.properties[key];
             if (property.hasOwnProperty('msmEnums')) {
                 const enumName = property.msmEnums;
-                const enumValues = this.config.getEnums(enumName);
+                const enumValues = this.config.getEnums(this.version.enums, enumName);
                 delete property.msmEnums;
                 property.bsonType = "string"; 
                 property.enum = Object.keys(enumValues);
@@ -77,7 +80,7 @@ export class Schema {
         Object.keys(this.schema.properties).forEach(key => {
             const property = this.schema.properties[key];
             if (property.hasOwnProperty('msmEnumList')) {
-                const enumValues = this.config.getEnums(property.msmEnumList);
+                const enumValues = this.config.getEnums(this.version.enums, property.msmEnumList);
                 delete property.msmEnumList; 
                 property.bsonType = "array";
                 property.items = {
