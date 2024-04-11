@@ -54,12 +54,12 @@ describe('Config', () => {
     });
 
     test('test getSchema', () => {
-        const schema = config.getSchema("people", new VersionNumber("1.0.0.0"));
+        const schema = config.getSchema("test", new VersionNumber("1.0.0.0"));
         expect(schema.bsonType).toBe("object");
     });
 
     test('test getTestData', () => {
-        expect(config.getTestData("people")[0].userName).toBe("JamesSmith");
+        expect(config.getTestData("test-1.0.0")[0].firstName).toBe("James");
     });
 
     test('test shouldLoadTestData', () => {
