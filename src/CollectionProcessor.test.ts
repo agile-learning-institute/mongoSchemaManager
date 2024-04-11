@@ -2,7 +2,7 @@ import { Config } from './config/Config';
 import { Collection } from './models/Collection';
 import { CollectionProcessor } from './CollectionProcessor';
 
-jest.mock('../src/config/config', () => {
+jest.mock('./config/Config', () => {
   return {
     Config: jest.fn().mockImplementation(() => ({
       connect: jest.fn().mockResolvedValue(undefined),
@@ -16,7 +16,7 @@ jest.mock('../src/config/config', () => {
   };
 });
 
-jest.mock('../src/models/collection', () => {
+jest.mock('./models/Collection', () => {
   return {
     Collection: jest.fn().mockImplementation(() => ({
       processVersions: jest.fn().mockResolvedValue(undefined),

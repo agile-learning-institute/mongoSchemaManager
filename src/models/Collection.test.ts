@@ -6,7 +6,7 @@ import { VersionNumber } from './VersionNumber';
 const findOneMock = jest.fn();
 
 // Mock the Version class
-jest.mock("../../src/models/version", () => {
+jest.mock("./Version", () => {
     return {
         Version: jest.fn().mockImplementation(() => {
             return {
@@ -18,7 +18,7 @@ jest.mock("../../src/models/version", () => {
 });
 
 // Mock the Config
-jest.mock("../../src/config/config", () => {
+jest.mock("../config/Config", () => {
     return {
         Config: jest.fn().mockImplementation(() => {
             return {
