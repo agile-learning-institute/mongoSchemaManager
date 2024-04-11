@@ -16,13 +16,12 @@ describe('Config', () => {
         config = new Config();
         await config.connect();
         db = config.getDatabase();
-        collection = config.getCollection(collectionName);
+        collection = await config.getCollection(collectionName);
     });
 
     afterEach(async () => {
         await config.dropCollection(collectionName);
         await config.disconnect()
-        console.log("After Each is Running");
     });
 
     test('test getDatabase', async () => {
@@ -30,7 +29,8 @@ describe('Config', () => {
     });
 
     test('test getCollection', async () => {
-        expect(config.getCollection(collectionName).collectionName).toBe(collectionName);
+        collection = await config.getCollection(collectionName);
+        expect(collection.collectionName).toBe(collectionName);
     });
 
     test('test set/getVersion', async () => {
@@ -62,10 +62,10 @@ describe('Config', () => {
 
         // Get the applied schema
         let appliedSchema = await config.getSchemaValidation(collectionName);
-        expect(appliedSchema).toStrictEqual(schema);
+        expect(appliedSchema).toStrictEqual({"$jsonSchema":schema});
 
         // Clear schema validation
-        config.clearSchemaValidation(collectionName);
+        await config.clearSchemaValidation(collectionName);
 
         // Verify schema validation is cleared
         appliedSchema = await config.getSchemaValidation(collectionName);

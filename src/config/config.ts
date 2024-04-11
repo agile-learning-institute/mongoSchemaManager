@@ -15,7 +15,7 @@ interface ConfigItem {
 }
 
 export class Config {
-    private configItems: ConfigItem[] = []; 
+    private configItems: ConfigItem[] = [];
     private connectionString: string;
     private dbName: string;
     private client?: MongoClient;
@@ -36,10 +36,10 @@ export class Config {
         if (existsSync(enumeratorsFileName)) {
             this.enumerators = JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'));
         } else {
-            this.enumerators = {"enumerators":{}};
+            this.enumerators = { "enumerators": {} };
         }
 
-        console.info("Configuration Initilized:", JSON.stringify(this.configItems)); 
+        console.info("Configuration Initilized:", JSON.stringify(this.configItems));
     }
 
     public async connect(): Promise<void> {
@@ -55,10 +55,17 @@ export class Config {
         return this.db;
     }
 
-    public getCollection(collectionName: string) {
+    public async getCollection(collectionName: string) {
         if (!this.db) {
             throw new Error("Database not connected");
         }
+        const collections = await this.db.listCollections({name: collectionName}, {nameOnly: true}).toArray();
+        if (collections.length === 0) {
+            // Collection does not exist, create it
+            await this.db.createCollection(collectionName);
+            console.info("Collection", collectionName, "created successfully.");
+        }
+
         return this.db.collection(collectionName);
     }
 
@@ -80,16 +87,17 @@ export class Config {
         const filter = { name: "VERSION" };
         const update = { $set: versionDocument };
         const options = { upsert: true };
-    
-        await this.getCollection(collectionName).updateOne(filter, update, options);
+        const collection = await this.getCollection(collectionName);
+        await collection.updateOne(filter, update, options);
         console.info("Version set or updated in collection", collectionName, "to", versionString);
-        }
+    }
 
     public async getVersion(collectionName: string): Promise<string> {
         if (!this.db) {
             throw new Error("config.getVersion - Database not connected");
         }
-        const versionDocument = await this.getCollection(collectionName).findOne({ name: "VERSION" });
+        const collection = await this.getCollection(collectionName);
+        const versionDocument = await collection.findOne({ name: "VERSION" });
         console.info("getVersion from collection", collectionName, "found", JSON.stringify(versionDocument));
         return versionDocument ? versionDocument.version : "0.0.0.0";
     }
@@ -98,24 +106,60 @@ export class Config {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+
+        // make sure the collection exists
+        await this.getCollection(collectionName);
+
+        const command = {
+            collMod: collectionName,
+            validator: { $jsonSchema: schema }
+        };
+
+        try {
+            const result = await this.db.command(command);
+            console.info("Schema validation applied successfully:", result);
+        } catch (error) {
+            console.error("Failed to apply schema validation:", error);
+            throw error;
+        }
     }
 
     public async getSchemaValidation(collectionName: string): Promise<any> {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
-        // let collectionDetails = await db.command({ listCollections: 1, filter: { name: collectionName } });
-        // let validationRules = collectionDetails?.collections[0]?.options?.validator || {};
-        return {};
+
+        // make sure the collection exists
+        await this.getCollection(collectionName);
+
+        const collections = await this.db.listCollections({ name: collectionName }, { nameOnly: false }).toArray();
+        if (collections.length != 1) {
+            throw new Error("getSchemaValidation could not find collection " + collectionName + collections);
+        }
+        const validationRules = collections[0].options?.validator || {};
+        return validationRules;
     }
 
     public async clearSchemaValidation(collectionName: string) {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+
+        // make sure the collection exists
+        await this.getCollection(collectionName);
+
+        const command = {
+            collMod: collectionName,
+            validator: {}
+        };
+
+        try {
+            const result = await this.db.command(command);
+            console.info("Schema validation cleared successfully:", result);
+        } catch (error) {
+            console.error("Failed to clear schema validation:", error);
+            throw error;
+        }
     }
 
     public async addIndexes(collectionName: string, indexes: any[]) {
@@ -183,7 +227,7 @@ export class Config {
     }
 
     public getCollectionConfig(fileName: string): any {
-        const filePath = join(this.configFolder, "collections", fileName );
+        const filePath = join(this.configFolder, "collections", fileName);
         return JSON.parse(readFileSync(filePath, 'utf-8'));
     }
 
@@ -191,7 +235,7 @@ export class Config {
         let typeFilename: string;
         typeFilename = join(this.msmTypesFolder, type + ".json");
         if (!existsSync(typeFilename)) {
-            typeFilename = join(this.configFolder, "customTypes", type + ".json") 
+            typeFilename = join(this.configFolder, "customTypes", type + ".json")
             if (!existsSync(typeFilename)) {
                 throw new Error("Type Not Found:" + type);
             }

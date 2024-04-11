@@ -11,9 +11,19 @@ mongoSchemaManager is a **Containerized Configuration as Code** MongoDB Schema M
 - use Template Source Code Repo to create a new repo
 - See instructions in the README
 
+## Enumerations
+Data quality, enumerations, volitalitility, bla bla bla
+
+## Version Numbers and Enumerators
+- Semantic Versioning + enumerators
+    - Major: 
+    - Minor:
+    - Patch:
+    - Enumerators: 
+- enumerators
+
 ## Configuration Files and Folders
 - collections
-- enumerators
 - schemas
 - testData
 - customTypes
