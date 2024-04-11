@@ -33,7 +33,7 @@ describe('Config', () => {
     });
 
     test('test getCollectionFiles', () => {
-        const files = ["test.json"];
+        const files = ["sample.json"];
         expect(config.getCollectionFiles()).toStrictEqual(files);
     });
 
@@ -43,8 +43,8 @@ describe('Config', () => {
     });
 
     test('test getCollectionConfig', () => {
-        const collectionConfig = config.getCollectionConfig("test.json");
-        expect(collectionConfig.name).toBe("test");
+        const collectionConfig = config.getCollectionConfig("sample.json");
+        expect(collectionConfig.name).toBe("sample");
         expect(collectionConfig.versions[0].version).toBe("1.0.0.1");
     });
 
@@ -54,12 +54,12 @@ describe('Config', () => {
     });
 
     test('test getSchema', () => {
-        const schema = config.getSchema("test", new VersionNumber("1.0.0.0"));
+        const schema = config.getSchema("sample", new VersionNumber("1.0.0.0"));
         expect(schema.bsonType).toBe("object");
     });
 
     test('test getTestData', () => {
-        expect(config.getTestData("test-1.0.0.1")[0].userName).toBe("Jane Doe");
+        expect(config.getTestData("sample-1.0.0.1")[0].userName).toBe("Jane Doe");
     });
 
     test('test shouldLoadTestData', () => {

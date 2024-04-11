@@ -1,9 +1,9 @@
 {
-  "name": "test",
+  "name": "sample",
   "versions": [
     {
       "version": "1.0.0.1",
-      "testData": "test-1.0.0.1.json",
+      "testData": "sample-1.0.0.1.json",
       "addIndexes": [
         {
           "name": "nameIndex",
@@ -27,11 +27,11 @@
     },
     {
       "version": "1.0.0.2",
-      "testData": "test-1.0.0.2.json"
+      "testData": "sample-1.0.0.2.json"
     },
     {
       "version": "1.0.1.3",
-      "testData": "test-1.0.1.3.json",
+      "testData": "sample-1.0.1.3.json",
       "aggregations": [
         [
           {
@@ -48,7 +48,7 @@
               }
             },
             "$merge": {
-              "into": "test",
+              "into": "sample",
               "on": "_id",
               "whenMatched": "replace",
               "whenNotMatched": "discard"
