@@ -3,10 +3,11 @@
  *      from the enviornment or configuration files, 
  *      and abstracts all file and mongodb i-o.
  */
+import { VersionNumber } from '../models/VersionNumber';
+import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
-import { VersionNumber } from '../models/VersionNumber';
 
 interface ConfigItem {
     name: string;
@@ -59,7 +60,7 @@ export class Config {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        const collections = await this.db.listCollections({name: collectionName}, {nameOnly: true}).toArray();
+        const collections = await this.db.listCollections({ name: collectionName }, { nameOnly: true }).toArray();
         if (collections.length === 0) {
             // Collection does not exist, create it
             await this.db.createCollection(collectionName);
@@ -166,21 +167,46 @@ export class Config {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+
+        try {
+            const collection = await this.getCollection(collectionName);
+            const result = await collection.createIndexes(indexes);
+            console.info("Indexes added successfully:", result);
+        } catch (error) {
+            console.error("Failed to add indexes:", error);
+            throw error;
+        }
     }
 
-    public async getIndexes(collectionName: string) {
+    public async getIndexes(collectionName: string): Promise<Index[]> {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        return this.db.collection(collectionName).indexes();
+        try {
+            const collection = await this.getCollection(collectionName);
+            const indexes = await collection.indexes();
+            return indexes as Index[];
+        } catch (error) {
+            console.error("Failed to get indexes:", error);
+            throw error;
+        }
     }
 
     public async dropIndexes(collectionName: string, names: string[]) {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+
+        try {
+            const collection = await this.getCollection(collectionName);
+            for (const name of names) {
+                await collection.dropIndex(name);
+                console.info(`Index ${name} dropped successfully from collection ${collectionName}.`);
+            }
+        } catch (error) {
+            console.error(`Failed to drop indexes from collection ${collectionName}:`, error);
+            throw error;
+        }
     }
 
     public async executeAggregations(collectionName: string, aggregations: any) {

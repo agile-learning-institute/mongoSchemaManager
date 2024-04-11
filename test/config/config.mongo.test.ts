@@ -76,23 +76,29 @@ describe('Config', () => {
         let indexes: {}[] = [
             {
                 "name": "nameIndex",
-                "keys": { "userName": 1 },
+                "key": { "userName": 1 },
                 "options": { "unique": true }
             }, {
                 "name": "typeIndex",
-                "keys": { "type": 1 },
+                "key": { "type": 1 },
                 "options": { "unique": false }
             }
         ];
-        let names: string[] = ["nameIndex", "typeIndex"];
+        let names: string[] = ["typeIndex"];
 
-        config.addIndexes(collectionName, indexes);
-        let appliedIndexes = config.getIndexes(collectionName);
-        expect(appliedIndexes).toStrictEqual(indexes);
+        await config.addIndexes(collectionName, indexes);
+        let appliedIndexes = await config.getIndexes(collectionName);
+        expect(appliedIndexes.some(index => index.name === "nameIndex")).toBe(true);
+        expect(appliedIndexes.some(index => index.name === "typeIndex")).toBe(true);
 
-        config.dropIndexes(collectionName, names);
-        appliedIndexes = config.getIndexes(collectionName);
-        expect(appliedIndexes).toStrictEqual([]);
+        await config.dropIndexes(collectionName, names);
+        appliedIndexes = await config.getIndexes(collectionName);
+        expect(appliedIndexes.some(index => index.name === "nameIndex")).toBe(true);
+        expect(appliedIndexes.some(index => index.name === "typeIndex")).toBe(false);
+
+        await config.dropIndexes(collectionName, ["nameIndex"]);
+        appliedIndexes = await config.getIndexes(collectionName);
+        expect(appliedIndexes.some(index => index.name === "nameIndex")).toBe(false);
     });
 
     test('test aexecuteAggregations', async () => {
