@@ -4,7 +4,7 @@ describe('Config', () => {
     let config: Config;
 
     beforeEach(async () => {
-        config = new Config();
+        try { config = new Config(); } catch (error) {}
     });
 
     test('test getDatabase', async () => {
@@ -52,6 +52,6 @@ describe('Config', () => {
     });
 
     test('test executeAggregations', async () => {
-        expect(() => config.executeAggregations("foo", {})).toThrow("Database not connected");
+        expect(() => config.executeAggregations("foo", [])).toThrow("Database not connected");
     });
 });
