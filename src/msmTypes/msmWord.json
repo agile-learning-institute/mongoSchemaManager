@@ -1,4 +1,0 @@
-{
-	"bsonType": "string",
-	"pattern": "^[^\\s]{0,32}$"
-}
