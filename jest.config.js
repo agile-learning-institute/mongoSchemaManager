@@ -1,7 +1,7 @@
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    roots: ['<rootDir>/test'],
+    roots: ['<rootDir>/src'],
     testMatch: ['**/*.test.ts'],
     collectCoverage: true,
     coverageDirectory: 'coverage',

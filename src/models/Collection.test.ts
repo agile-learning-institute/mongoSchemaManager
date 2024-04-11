@@ -1,4 +1,4 @@
-import { Config } from '../Config/Config'
+import { Config } from '../config/Config'
 import { Collection } from './Collection';
 import { VersionNumber } from './VersionNumber';
 

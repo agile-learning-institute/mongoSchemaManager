@@ -3,7 +3,7 @@
  *       in the test/resources folder of this repo.
  */
 import { Config } from './Config';
-import { VersionNumber } from '../Models/VersionNumber';
+import { VersionNumber } from '../models/VersionNumber';
 
 describe('Config', () => {
     let config: Config;

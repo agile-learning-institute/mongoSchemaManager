@@ -1,4 +1,4 @@
-import { Config } from "../Config/Config";
+import { Config } from "../config/Config";
 import { VersionNumber } from "./VersionNumber";
 
 /**

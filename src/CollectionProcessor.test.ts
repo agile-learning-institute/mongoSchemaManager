@@ -1,6 +1,6 @@
-import { Config } from './Config/Config';
-import { Collection } from '../src/Models/Collection';
-import { CollectionProcessor } from '../src/CollectionProcessor';
+import { Config } from './config/Config';
+import { Collection } from './models/Collection';
+import { CollectionProcessor } from './CollectionProcessor';
 
 jest.mock('../src/config/config', () => {
   return {
