@@ -152,9 +152,17 @@ describe('Config', () => {
     });
 
     test('test bulkLoad', async () => {
-        const testData: any[] = ["TODO"];
-        config.bulkLoad(collectionName, testData);
-        const result: any[] = []; //mongodb get all
-        expect(result).toStrictEqual(testData);
+        const testData: any[] = [
+            {"firstName":"Foo", "lastName":"Bar"},
+            {"firstName":"Fab", "lastName":"Far"},
+            {"firstName":"Bab", "lastName":"Baf"}
+        ];
+        await config.bulkLoad(collectionName, testData);
+        let result = await db.collection(collectionName).find().toArray();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(3);
+        expect(result[0].firstName).toBe("Foo");
+        expect(result[1].firstName).toBe("Fab");
+        expect(result[2].firstName).toBe("Bab");
     });
 });

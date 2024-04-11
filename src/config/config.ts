@@ -214,7 +214,7 @@ export class Config {
             throw new Error("Database not connected");
         }
         const collection = await this.getCollection(collectionName);
-        for (const aggregation in aggregations) {
+        for (const aggregation of aggregations) {
             const result = await collection.aggregate(aggregation).toArray();
             console.info("Executed:", aggregations, "Result:", result);
         }
@@ -224,7 +224,15 @@ export class Config {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        // TODO
+        
+        try {
+            const collection = await this.getCollection(collectionName);
+            const result = await collection.insertMany(data);
+            console.info(`Bulk load successful, ${result.insertedCount} items inserted into collection ${collectionName}.`);
+        } catch (error) {
+            console.error("Failed to perform bulk load:", error);
+            throw error; 
+        }
     }
 
     public async disconnect(): Promise<void> {
