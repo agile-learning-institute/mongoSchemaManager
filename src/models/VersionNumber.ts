@@ -1,4 +1,7 @@
-
+/**
+ * This is a simple class that implements a comparable, 
+ * four digit, semantic version number.
+ */
 export class VersionNumber {
     public major: number;
     public minor: number;
@@ -26,6 +29,11 @@ export class VersionNumber {
         this.enums = numbers[3];
     }
 
+    /**
+     * Comparison operator
+     * @param compareto 
+     * @returns True if the value provided is greater than this
+     */
     public isGreaterThan(compareto: string): boolean {
         const that = new VersionNumber(compareto);
 
@@ -44,10 +52,12 @@ export class VersionNumber {
         return false;
     }
 
+    // Simple getter for three character version
     public getShortVersionString(): string {
         return this.major + "." + this.minor +  "." + this.patch;
     }
 
+    // Simple getter for full version
     public getVersionString(): string {
         return this.getShortVersionString() + "." + this.enums;
     }
