@@ -1,20 +1,23 @@
-/**
- * Class Config: This class manages configuration values 
- *      from the enviornment or configuration files, 
- *      and abstracts all file and mongodb i-o.
- */
 import { VersionNumber } from '../models/VersionNumber';
 import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
 
+/**
+ * A config item, used to track where configuration values were found
+ */
 interface ConfigItem {
     name: string;
     value: string;
     from: string;
 }
 
+/**
+ * Class Config: This class manages configuration values 
+ *      from the enviornment or configuration files, 
+ *      and abstracts all file and mongodb i-o.
+ */
 export class Config {
     private configItems: ConfigItem[] = [];
     private connectionString: string;
@@ -26,6 +29,9 @@ export class Config {
     private loadTestData: boolean;
     private enumerators: any;
 
+    /**
+     * Constructor gets configuration values, loads the enumerators, and logs completion
+     */
     constructor() {
         this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/config", false);
         this.msmTypesFolder = this.getConfigValue("MSM_TYPES", "/opt/mongoSchemaManager/msmTypes", false);
@@ -43,6 +49,9 @@ export class Config {
         console.info("Configuration Initilized:", JSON.stringify(this.configItems));
     }
 
+    /**
+     * Connect to the Mongo Database
+     */
     public async connect(): Promise<void> {
         this.client = new MongoClient(this.connectionString);
         await this.client.connect();
@@ -50,6 +59,9 @@ export class Config {
         console.info("Database", this.dbName, "Connected");
     }
 
+    /**
+     * Simple getter for database object
+     */
     public getDatabase(): Db {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -57,6 +69,9 @@ export class Config {
         return this.db;
     }
 
+    /**
+     * Get a collection object, if the collection does not exist create it
+     */
     public async getCollection(collectionName: string) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -71,6 +86,9 @@ export class Config {
         return this.db.collection(collectionName);
     }
 
+    /**
+     * Drop a collection - only used in jest testing 
+     */
     public async dropCollection(collectionName: string) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -83,6 +101,9 @@ export class Config {
         console.info("Collection", collectionName, "dropped");
     }
 
+    /**
+     * Set a Version by upserting the Version document
+     */
     public async setVersion(collectionName: string, versionString: string) {
         if (!this.db) {
             throw new Error("config.setVersion - Database not connected");
@@ -96,6 +117,12 @@ export class Config {
         console.info("Version set or updated in collection", collectionName, "to", versionString);
     }
 
+    /**
+     * Get the version number from the collection Version document
+     * 
+     * @param collectionName 
+     * @returns Version String
+     */
     public async getVersion(collectionName: string): Promise<string> {
         if (!this.db) {
             throw new Error("config.getVersion - Database not connected");
@@ -106,6 +133,12 @@ export class Config {
         return versionDocument ? versionDocument.version : "0.0.0.0";
     }
 
+    /**
+     * Add the provided schema validation to the identified collection
+     * 
+     * @param collectionName 
+     * @param schema 
+     */
     public async applySchemaValidation(collectionName: string, schema: any) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -128,6 +161,12 @@ export class Config {
         }
     }
 
+    /**
+     * Get the current schema validation - Used by jest testing
+     * 
+     * @param collectionName 
+     * @returns schema
+     */
     public async getSchemaValidation(collectionName: string): Promise<any> {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -146,6 +185,11 @@ export class Config {
         return validationRules;
     }
 
+    /**
+     * Clear (remove) the current schema validation from the specified collection
+     * 
+     * @param collectionName 
+     */
     public async clearSchemaValidation(collectionName: string) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -168,6 +212,12 @@ export class Config {
         }
     }
 
+    /**
+     * Create the specified indexes on the identified collection
+     * 
+     * @param collectionName 
+     * @param indexes 
+     */
     public async addIndexes(collectionName: string, indexes: any[]) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -183,6 +233,12 @@ export class Config {
         }
     }
 
+    /**
+     * get Indexes - used by jest testing
+     * 
+     * @param collectionName 
+     * @returns indexes
+     */
     public async getIndexes(collectionName: string): Promise<Index[]> {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -197,6 +253,12 @@ export class Config {
         }
     }
 
+    /**
+     * Drop the named indexes from the specified collection
+     * 
+     * @param collectionName 
+     * @param names (index names)
+     */
     public async dropIndexes(collectionName: string, names: string[]) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -214,6 +276,12 @@ export class Config {
         }
     }
 
+    /**
+     * Execut the provided aggregation pipelines on the identified collection
+     * 
+     * @param collectionName 
+     * @param aggregations - array of aggregation pipelines
+     */
     public async executeAggregations(collectionName: string, aggregations: any[][]) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -226,6 +294,12 @@ export class Config {
         }
     }
 
+    /**
+     * bulk laod the provided data to the specified collection
+     * 
+     * @param collectionName 
+     * @param data 
+     */
     public async bulkLoad(collectionName: string, data: any[]) {
         if (!this.db) {
             throw new Error("Database not connected");
@@ -241,6 +315,9 @@ export class Config {
         }
     }
 
+    /**
+     * Disconnect from the database
+     */
     public async disconnect(): Promise<void> {
         if (this.client) {
             await this.client.close();
@@ -249,6 +326,13 @@ export class Config {
         }
     }
 
+    /**
+     * Get the named enumerators object from the enumerators version specified
+     * 
+     * @param version 
+     * @param name 
+     * @returns enumerators object {"Value":"Description"}
+     */
     public getEnums(version: number, name: string): any {
         if (this.enumerators[version].version != version) {
             throw new Error("Invalid Enumerators File bad version number sequence")
@@ -260,6 +344,11 @@ export class Config {
         }
     }
 
+    /**
+     * Get the collection configuration files from the collections folder
+     * 
+     * @returns array of file names
+     */
     public getCollectionFiles(): string[] {
         const collectionsFolder = join(this.configFolder, "collections");
         const collectionFiles = readdirSync(collectionsFolder).filter(file => file.endsWith('.json'));
@@ -269,11 +358,24 @@ export class Config {
         return collectionFiles;
     }
 
+    /**
+     * Read the specified collection configuration file 
+     * 
+     * @param fileName 
+     * @returns JSON Collection object
+     */
     public getCollectionConfig(fileName: string): any {
         const filePath = join(this.configFolder, "collections", fileName);
         return JSON.parse(readFileSync(filePath, 'utf-8'));
     }
 
+    /**
+     * Get a custom type, looking first in the msmTypesFolder and if not
+     * found there look in the <root>/customTypes folder.
+     * 
+     * @param type - the name of the type file (without a json extension)
+     * @returns The parsed JSON object from the type file
+     */
     public getType(type: string): any {
         let typeFilename: string;
         typeFilename = join(this.msmTypesFolder, type + ".json");
@@ -287,28 +389,67 @@ export class Config {
         return JSON.parse(typeContent);
     }
 
+    /**
+     * Read the collection schema file specified at the version provided
+     * 
+     * @param collection 
+     * @param version 
+     * @returns a schema object (NOT pre-processed)
+     */
     public getSchema(collection: string, version: VersionNumber): any {
         const schemaFileName = join(this.configFolder, "schemas", collection + "-" + version.getShortVersionString() + ".json");
         return JSON.parse(readFileSync(schemaFileName, 'utf8'));
     }
 
+    /**
+     * Read the test data file specified
+     * 
+     * @param filename 
+     * @returns JSON parsed object from the file
+     */
     public getTestData(filename: string): any {
         let filePath = join(this.configFolder, "testData", filename + ".json");
         return JSON.parse(readFileSync(filePath, 'utf8'));
     }
 
+    /**
+     * Simple Getter for <root> folder
+     * 
+     * @returns ConfigFolder
+     */
     public getConfigFolder(): string {
         return this.configFolder;
     }
 
+    /**
+     * Simple Getter for msmTypes
+     * 
+     * @returns msmTypes Folder
+     */
     public getMsmTypesFolder(): string {
         return this.msmTypesFolder;
     }
 
+    /**
+     * simple should-load getter
+     * 
+     * @returns true if test data should be loaded
+     */
     public shouldLoadTestData(): boolean {
         return this.loadTestData;
     }
 
+    /**
+     * Get the named configuration value, from the environment if available, 
+     * then from a file if present, and finally use the provided default if not 
+     * found. This will add a ConfigItem that describes where this data was found
+     * to the configItems array. Secret values are not recorded in the configItem.
+     * 
+     * @param name 
+     * @param defaultValue 
+     * @param isSecret 
+     * @returns the value that was found.
+     */
     private getConfigValue(name: string, defaultValue: string, isSecret: boolean): string {
         let value = process.env[name] || defaultValue;
         let from = 'default';
