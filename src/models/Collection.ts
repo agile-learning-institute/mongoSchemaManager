@@ -7,7 +7,7 @@ interface CollectionConfig {
 }
 
 /**
- * This class processes a collection configuration file
+ * This class processes a collection configuration file. 
  */
 export class Collection {
     private config: Config;
@@ -15,6 +15,14 @@ export class Collection {
     private versions: Version[] = [];
     private currentVersion: string = "";
 
+    /**
+     * Constructor gets a dependency injection of the config object, 
+     * and a parsed collection config file. See /docs/config-schema.json.
+     * Construction constructs Version documents before processing.
+     * 
+     * @param theConfig 
+     * @param collectionConfig 
+     */
     constructor(theConfig: Config, collectionConfig: CollectionConfig) {
         this.config = theConfig;
         this.collectionName = collectionConfig.collectionName;
@@ -23,6 +31,10 @@ export class Collection {
         });
     }
 
+    /**
+     * Processing the array of versions found in a collection configuration file
+     * is the core of how msm works.
+     */
     public async processVersions() {
         this.currentVersion = await this.config.getVersion(this.collectionName);
         for (const version of this.versions) {
@@ -33,6 +45,9 @@ export class Collection {
         }
     }
 
+    /**
+     * Simple Getters
+     */
     public getCurrentVersion(): string {
         return this.currentVersion;
     }
