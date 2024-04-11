@@ -4,6 +4,7 @@ import { VersionNumber } from './VersionNumber';
 
 /**
  * This class is responsible for implementing a Version of a collection.
+ * The apply method in this class is responsible processing a migration
  */
 export class Version {
     private config: Config;
@@ -15,6 +16,14 @@ export class Version {
     private testData?: string;
     private theSchema: any;
 
+    /**
+     * The constructor initializes the instance, 
+     * and retrieves the process schema needed by this version
+     * 
+     * @param config Dependency injection
+     * @param collection The name of the collection
+     * @param theVersion The version number
+     */
     constructor(config: Config, collection: string, theVersion: any) {
         this.config = config;
         this.collection = collection;
@@ -25,11 +34,9 @@ export class Version {
         this.theSchema = schemaProcessor.getSchema();
     }
 
-    // Generic getter for testing
-    public getThis(): any {
-        return this;
-    }
-
+    /**
+     * This is where the magic happens
+     */
     public async apply(): Promise<void> {
         this.config.clearSchemaValidation(this.collection);
 
@@ -53,7 +60,7 @@ export class Version {
         // Load Test Data
         if (this.config.shouldLoadTestData() && (this.testData)) {
             this.config.bulkLoad(
-                this.collection, 
+                this.collection,
                 this.config.getTestData(this.testData)
             );
         }
@@ -61,7 +68,15 @@ export class Version {
         this.config.setVersion(this.collection, this.versionNumber.getVersionString())
     }
 
+    // Simple version number getter
     public getVersion(): VersionNumber {
         return this.versionNumber;
     }
+
+    // Generic getter for testing
+    public getThis(): any {
+        return this;
+    }
+
+
 }
