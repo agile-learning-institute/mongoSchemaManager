@@ -1,4 +1,4 @@
-import { VersionNumber } from '../../src/models/VersionNumber';
+import { VersionNumber } from './VersionNumber';
 
 describe('VersionNumber', () => {
 

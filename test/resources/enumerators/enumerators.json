@@ -13,28 +13,6 @@
             "defaultStatus": {
                 "Active":"Not Deleted",
                 "Archived":"Soft Delete Indicator"
-            },
-            "peopleStatus": {
-                "Draft": "Not yet active",
-                "Active":"Not Deleted",
-                "Archived":"Soft Delete Indicator"
-            },
-            "promptType": {
-                "radio": "Select one option",
-                "check": "Select multiple options",
-                "text": "Enter a text string"
-            },
-            "promptOptions": {
-                "one": "Option 1",
-                "two": "Option 2",
-                "three": "Optionno 3"
-            },
-            "roles": {
-                "Member": "A member",
-                "Mentor": "A mentor",
-                "Partner": "A partner contact",
-                "Donor": "A donor or supporter",
-                "Staff": "A member of staff"
             }
         }
     },
@@ -44,31 +22,32 @@
         "version": 2,
         "enumerators": {
             "defaultStatus": {
-                "Active":"Not Deleted",
-                "Archived":"Soft Delete Indicator"
+                "Draft":"Not finalized",
+                "Active":"Not deleted",
+                "Archived":"Soft delete indicator"
+            }
+        }
+    },
+    {
+        "name": "Enumerations",
+        "status": "Active",
+        "version": 3,
+        "enumerators": {
+            "defaultStatus": {
+                "Draft":"Not finalized",
+                "Active":"Not deleted",
+                "Archived":"Soft delete indicator"
             },
-            "peopleStatus": {
-                "Draft": "Not yet active",
-                "Active":"Not Deleted",
-                "Archived":"Soft Delete Indicator"
-            },
-            "promptType": {
+            "type": {
                 "radio": "Select one option",
                 "check": "Select multiple options",
                 "text": "Enter a text string"
             },
-            "promptOptions": {
-                "one": "Option 1",
-                "two": "Option 2",
-                "three": "Optionno 3"
-            },
-            "roles": {
-                "Member": "A member",
-                "Mentor": "A mentor",
-                "Partner": "A partner contact",
-                "Donor": "A donor or supporter",
-                "Staff": "A member of staff"
+            "tags": {
+                "User": "A User",
+                "Admin": "An administrator",
+                "Super": "A super user"
             }
         }
-    }
+    }    
 ]

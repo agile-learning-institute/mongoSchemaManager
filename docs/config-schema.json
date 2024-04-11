@@ -73,10 +73,15 @@
 						"items": {
 							"type": "object",
 							"required": [
+								"name", 
 								"keys",
 								"options"
 							],
 							"properties": {
+								"name": {
+									"description": "The unique index name",
+									"type": "string"
+								},
 								"keys": {
 									"description": "The index key fields",
 									"type": "object"

@@ -1,5 +1,8 @@
 {
-	"bsonType": "string",
-	"pattern": "TODO: Regex for 512 char - only whitespace allowed is a space (no /t/c/n)"
+	"bsonType": "array",
+	"description": "A list of sentences",
+	"items": {
+		"msmType": "msmSentence"
+	} 
 
 }

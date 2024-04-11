@@ -3,11 +3,11 @@
     "properties": {
         "firstName": {
             "description": "The persons first name",
-            "smType": "smWord"
+            "msmType": "msmWord"
         },
         "lastName": {
             "description": "The persons last name",
-            "smType": "smWord"
+            "msmType": "msmWord"
         }
     },
     "additionalProperties": false

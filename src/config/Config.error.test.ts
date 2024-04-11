@@ -1,4 +1,4 @@
-import { Config } from '../../src/config/Config';
+import { Config } from './Config';
 
 describe('Config', () => {
     let config: Config;

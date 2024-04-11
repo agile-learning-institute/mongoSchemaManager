@@ -1,4 +1,4 @@
-import { Config } from '../src/Config/Config';
+import { Config } from './Config/Config';
 import { Collection } from '../src/Models/Collection';
 import { CollectionProcessor } from '../src/CollectionProcessor';
 

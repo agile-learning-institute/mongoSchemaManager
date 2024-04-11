@@ -1,6 +1,6 @@
-import { Config } from '../../src/Config/Config';
-import { Version } from '../../src/Models/Version';
-import { VersionNumber } from '../../src/Models/VersionNumber';
+import { Config } from '../Config/Config';
+import { Version } from './Version';
+import { VersionNumber } from './VersionNumber';
 
 jest.mock('../../src/config/Config', () => {
     return {

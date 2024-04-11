@@ -1,0 +1,30 @@
+{
+    "bsonType": "object",
+    "required": [
+        "_id",
+        "userName"
+    ],
+    "properties": {
+        "_id": {
+            "description": "The unique identifier for a person",
+            "bsonType": "objectId"
+        },
+        "name": {
+            "description": "VERSION document only",
+            "msmType": "msmWord"
+        },
+        "version": {
+            "description": "VERSION document only",
+            "msmType": "msmWord"
+        },
+        "userName": {
+            "description": "Username",
+            "bsonType": "string"
+        },
+        "status": {
+            "description": "The status",
+            "msmEnums": "defaultStatus"
+        }
+    },
+    "additionalProperties": false
+}
