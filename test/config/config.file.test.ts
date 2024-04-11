@@ -33,7 +33,7 @@ describe('Config', () => {
     });
 
     test('test getCollectionFiles', () => {
-        const files = ["people.json", "plans.json"];
+        const files = ["test.json"];
         expect(config.getCollectionFiles()).toStrictEqual(files);
     });
 
@@ -43,9 +43,9 @@ describe('Config', () => {
     });
 
     test('test getCollectionConfig', () => {
-        const collectionConfig = config.getCollectionConfig("people.json");
-        expect(collectionConfig.name).toBe("people");
-        expect(collectionConfig.versions[0].version).toBe("1.0.0");
+        const collectionConfig = config.getCollectionConfig("test.json");
+        expect(collectionConfig.name).toBe("test");
+        expect(collectionConfig.versions[0].version).toBe("1.0.0.1");
     });
 
     test('test getType', () => {
