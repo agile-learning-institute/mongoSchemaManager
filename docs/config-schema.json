@@ -1,6 +1,31 @@
 {
 	"description": "SchemaManager Collection Configuration",
 	"type": "object",
+	"example": {
+		"name": "plans",
+		"versions": [
+			{
+				"version": "1.0.0.0",
+				"dropIndexes": ["typeIndex"],
+				"aggregations": [
+				  [
+					{"$addFields": {"name": {"$concat": ["$firstName", " ", "$lastName"]}}},
+					{"$merge": {"into": "plans","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+				  ],[
+					{"$unset": ["firstName", "lastName"]},
+					{"$merge": {"into": "plans","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+				  ]
+				],
+				"addIndexes": [
+				  {
+					"name": "nameIndex","key": { "userName": 1 },"options": { "unique": true }
+				  }, {
+					"name": "typeIndex","key": { "type": 1 },"options": { "unique": false }
+				  }
+				]
+			}
+		]
+	},
 	"required": [
 		"name",
 		"versions"
@@ -23,6 +48,10 @@
 						"description": "The Version Number",
 						"type": "string"
 					},
+					"testData": {
+						"description": "Name of test data file from the testData folder to laod",
+						"type": "string"
+					},
 					"dropIndexes": {
 						"description": "List of indexs to drop",
 						"type": "array",
@@ -35,7 +64,7 @@
 						"type": "array",
 						"items": {
 							"description": "The migration pipeline",
-							"type": "object"
+							"type": "array"
 						}
 					},
 					"addIndexes": {
