@@ -209,12 +209,15 @@ export class Config {
         }
     }
 
-    public async executeAggregations(collectionName: string, aggregations: any) {
+    public async executeAggregations(collectionName: string, aggregations: any[][]) {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        const result = await this.db.collection(collectionName).aggregate(aggregations).toArray();
-        console.info("Executed: ", aggregations, "Result", result);
+        const collection = await this.getCollection(collectionName);
+        for (const aggregation in aggregations) {
+            const result = await collection.aggregate(aggregation).toArray();
+            console.info("Executed:", aggregations, "Result:", result);
+        }
     }
 
     public async bulkLoad(collectionName: string, data: any[]) {

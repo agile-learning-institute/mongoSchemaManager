@@ -62,7 +62,7 @@ describe('Config', () => {
 
         // Get the applied schema
         let appliedSchema = await config.getSchemaValidation(collectionName);
-        expect(appliedSchema).toStrictEqual({"$jsonSchema":schema});
+        expect(appliedSchema).toStrictEqual({ "$jsonSchema": schema });
 
         // Clear schema validation
         await config.clearSchemaValidation(collectionName);
@@ -101,27 +101,54 @@ describe('Config', () => {
         expect(appliedIndexes.some(index => index.name === "nameIndex")).toBe(false);
     });
 
-    test('test aexecuteAggregations', async () => {
+    test('test executeAggregations', async () => {
         const document = { "firstName": "Foo", "lastName": "Bar" };
         const expectedOutput = { "name": "Foo Bar" };
-        const aggregations = [
+        const aggregation1 = [
             {
                 $addFields: {
                     name: {
                         $concat: ["$firstName", " ", "$lastName"]
                     }
                 }
-            }, {
-                $unset: ["firstName", "lastName"]
-            }, {
-
+            },
+            {
+                $merge: {
+                    into: collectionName,
+                    on: "_id",
+                    whenMatched: "replace",
+                    whenNotMatched: "discard"
+                }
             }
         ];
 
-        db.collection(collectionName).insertOne(document);
-        config.executeAggregations(collectionName, aggregations);
-        const result = db.collection(collectionName).findOne();
-        expect(result).toStrictEqual(expectedOutput);
+        const aggregation2 = [
+            {
+                $unset: ["firstName", "lastName"]
+            },
+            {
+                $merge: {
+                    into: collectionName,
+                    on: "_id",
+                    whenMatched: "replace",
+                    whenNotMatched: "discard"
+                }
+            }
+        ];
+        const aggregations = [
+            aggregation1,
+            aggregation2
+        ];
+
+        await db.collection(collectionName).insertOne(document);
+        await config.executeAggregations(collectionName, aggregations);
+        let result = await db.collection(collectionName).find().toArray();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(1);
+        expect(result[0]).not.toHaveProperty("firstName");
+        expect(result[0]).not.toHaveProperty("lastName");
+        expect(result[0]).toHaveProperty("name");
+        expect(result[0].name).toBe("Foo Bar")
     });
 
     test('test bulkLoad', async () => {
