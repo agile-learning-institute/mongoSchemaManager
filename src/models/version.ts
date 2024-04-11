@@ -10,7 +10,7 @@ export class Version {
     private collection: string;
     private versionNumber: VersionNumber;
     private dropIndexes?: string[] = [];
-    private aggregations?: object[] = [];
+    private aggregations?: object[][] = [];
     private addIndexes?: object[] = [];
     private testData?: string;
     private theSchema: any;
@@ -35,17 +35,17 @@ export class Version {
 
         // Drop indexes
         if (this.dropIndexes) {
-            this.config.dropIndexes(this.dropIndexes);
+            this.config.dropIndexes(this.collection, this.dropIndexes);
         }
 
         // Execute Aggregations
         if (this.aggregations) {
-            this.config.executeAggregations(this.aggregations);
+            this.config.executeAggregations(this.collection, this.aggregations);
         }
 
         // Add Indexes
         if (this.addIndexes) {
-            this.config.addIndexes(this.addIndexes);
+            this.config.addIndexes(this.collection, this.addIndexes);
         }
 
         this.config.applySchemaValidation(this.collection, this.theSchema);
