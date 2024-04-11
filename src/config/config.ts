@@ -3,8 +3,8 @@
  *      from the enviornment or configuration files, 
  *      and abstracts all file and mongodb i-o.
  */
-import { VersionNumber } from '../models/VersionNumber';
-import { Index } from '../models/Index';
+import { VersionNumber } from '../Models/VersionNumber';
+import { Index } from '../Models/Index';
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';

@@ -1,4 +1,4 @@
-import { Config } from "../config/Config";
+import { Config } from "../Config/Config";
 import { Version } from "./Version"; 
 
 interface CollectionConfig {

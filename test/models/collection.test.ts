@@ -1,6 +1,6 @@
-import { Config } from '../../src/config/Config'
-import { Collection } from '../../src/models/Collection';
-import { VersionNumber } from '../../src/models/VersionNumber';
+import { Config } from '../../src/Config/Config'
+import { Collection } from '../../src/Models/Collection';
+import { VersionNumber } from '../../src/Models/VersionNumber';
 
 // Setup for mocking MongoDB findOne
 const findOneMock = jest.fn();

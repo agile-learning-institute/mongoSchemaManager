@@ -2,8 +2,8 @@
  * NOTE: This set of unit tests uses the testing data 
  *       in the test/resources folder of this repo.
  */
-import { Config } from '../../src/config/Config';
-import { VersionNumber } from '../../src/models/VersionNumber';
+import { Config } from '../../src/Config/Config';
+import { VersionNumber } from '../../src/Models/VersionNumber';
 
 describe('Config', () => {
     let config: Config;
