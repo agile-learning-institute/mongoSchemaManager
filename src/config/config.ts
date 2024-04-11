@@ -47,6 +47,7 @@ export class Config {
         this.client = new MongoClient(this.connectionString);
         await this.client.connect();
         this.db = this.client.db(this.dbName);
+        console.info("Database", this.dbName, "Connected");
     }
 
     public getDatabase(): Db {
@@ -76,8 +77,10 @@ export class Config {
         }
         const success = await this.db.collection(collectionName).drop();
         if (!success) {
+            console.error("Drop Collection failed")
             throw new Error("Drop Collection Failed!");
         }
+        console.info("Collection", collectionName, "dropped");
     }
 
     public async setVersion(collectionName: string, versionString: string) {
@@ -118,7 +121,7 @@ export class Config {
 
         try {
             const result = await this.db.command(command);
-            console.info("Schema validation applied successfully:", result);
+            console.info("Schema validation applied successfully:", JSON.stringify(result));
         } catch (error) {
             console.error("Failed to apply schema validation:", error);
             throw error;
@@ -138,6 +141,8 @@ export class Config {
             throw new Error("getSchemaValidation could not find collection " + collectionName + collections);
         }
         const validationRules = collections[0].options?.validator || {};
+
+        console.info("Get Schema Rules:", JSON.stringify(validationRules));
         return validationRules;
     }
 
@@ -156,7 +161,7 @@ export class Config {
 
         try {
             const result = await this.db.command(command);
-            console.info("Schema validation cleared successfully:", result);
+            console.info("Schema validation cleared successfully:", JSON.stringify(result));
         } catch (error) {
             console.error("Failed to clear schema validation:", error);
             throw error;
@@ -171,7 +176,7 @@ export class Config {
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.createIndexes(indexes);
-            console.info("Indexes added successfully:", result);
+            console.info("Indexes added successfully:", JSON.stringify(result));
         } catch (error) {
             console.error("Failed to add indexes:", error);
             throw error;
@@ -216,7 +221,8 @@ export class Config {
         const collection = await this.getCollection(collectionName);
         for (const aggregation of aggregations) {
             const result = await collection.aggregate(aggregation).toArray();
-            console.info("Executed:", aggregations, "Result:", result);
+            console.info("Executed:", JSON.stringify(aggregations));
+            console.info( "Result:", JSON.stringify(result));
         }
     }
 
@@ -228,7 +234,7 @@ export class Config {
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.insertMany(data);
-            console.info(`Bulk load successful, ${result.insertedCount} items inserted into collection ${collectionName}.`);
+            console.info("Bulk load successful: ", JSON.stringify(result));
         } catch (error) {
             console.error("Failed to perform bulk load:", error);
             throw error; 
