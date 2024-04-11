@@ -12,46 +12,46 @@ describe('Config', () => {
     });
 
     test('test getCollection', async () => {
-        expect(() => config.getCollection("foo")).toThrow("Database not connected");
+        await expect(() => config.getCollection("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test dropCollection', async () => {
-        expect(() => config.dropCollection("foo")).toThrow("Database not connected");
+        await expect(() => config.dropCollection("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test setVersion', async () => {
-        expect(() => config.setVersion("foo", "")).toThrow("Database not connected");
+        await expect(() => config.setVersion("foo", "")).rejects.toThrow("Database not connected");
     });
 
     test('test getVersion', async () => {
-        expect(() => config.getCollection("foo")).toThrow("Database not connected");
+        await expect(() => config.getCollection("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test applySchemaValidation', async () => {
-        expect(() => config.applySchemaValidation("foo", {})).toThrow("Database not connected");
+        await expect(() => config.applySchemaValidation("foo", {})).rejects.toThrow("Database not connected");
     });
 
     test('test getSchemaValidation', async () => {
-        expect(() => config.getCollection("foo")).toThrow("Database not connected");
+        await expect(() => config.getCollection("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test clearSchemaValidation', async () => {
-        expect(() => config.clearSchemaValidation("foo")).toThrow("Database not connected");
+        await expect(() => config.clearSchemaValidation("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test addIndexes', async () => {
-        expect(() => config.addIndexes("foo", [])).toThrow("Database not connected");
+        await expect(() => config.addIndexes("foo", [])).rejects.toThrow("Database not connected");
     });
 
     test('test getIndexes', async () => {
-        expect(() => config.getIndexes("foo")).toThrow("Database not connected");
+        await expect(() => config.getIndexes("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test dropIndexes', async () => {
-        expect(() => config.dropIndexes("foo", [])).toThrow("Database not connected");
+        await expect(() => config.dropIndexes("foo", [])).rejects.toThrow("Database not connected");
     });
 
     test('test executeAggregations', async () => {
-        expect(() => config.executeAggregations("foo", [])).toThrow("Database not connected");
+        await expect(() => config.executeAggregations("foo", [])).rejects.toThrow("Database not connected");
     });
 });
