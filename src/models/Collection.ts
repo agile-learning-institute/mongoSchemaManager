@@ -2,7 +2,7 @@ import { Config } from "../config/Config";
 import { Version } from "./Version"; 
 
 interface CollectionConfig {
-    collectionName: string;
+    name: string;
     versions: any[];
 }
 
@@ -25,8 +25,9 @@ export class Collection {
      */
     constructor(theConfig: Config, collectionConfig: CollectionConfig) {
         this.config = theConfig;
-        this.collectionName = collectionConfig.collectionName;
+        this.collectionName = collectionConfig.name;
         collectionConfig.versions.forEach(version => {
+            console.info("Initilizing Version", this.collectionName, version.version)
             this.versions.push(new Version(this.config, this.collectionName, version));
         });
     }
