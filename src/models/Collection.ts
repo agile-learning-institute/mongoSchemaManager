@@ -40,7 +40,7 @@ export class Collection {
         this.currentVersion = await this.config.getVersion(this.collectionName);
         for (const version of this.versions) {
             if (version.getVersion().isGreaterThan(this.currentVersion)) {
-                version.apply();
+                await version.apply();
                 this.currentVersion = await this.config.getVersion(this.collectionName);
             }
         }

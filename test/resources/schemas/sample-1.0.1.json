@@ -19,7 +19,7 @@
         },
         "userName": {
             "description": "Username",
-            "bsonType": "msmWord"
+            "msmType": "msmWord"
         },
         "status": {
             "description": "The status",

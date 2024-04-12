@@ -3,6 +3,7 @@ import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
+import { EJSON } from 'bson';
 
 /**
  * A config item, used to track where configuration values were found
@@ -108,13 +109,19 @@ export class Config {
         if (!this.db) {
             throw new Error("config.setVersion - Database not connected");
         }
-        const versionDocument = { name: "VERSION", version: versionString };
-        const filter = { name: "VERSION" };
-        const update = { $set: versionDocument };
-        const options = { upsert: true };
-        const collection = await this.getCollection(collectionName);
-        await collection.updateOne(filter, update, options);
-        console.info("Version set or updated in collection", collectionName, "to", versionString);
+
+        try {
+            const versionDocument = { name: "VERSION", version: versionString };
+            const filter = { name: "VERSION" };
+            const update = { $set: versionDocument };
+            const options = { upsert: true };
+            const collection = await this.getCollection(collectionName);
+            await collection.updateOne(filter, update, options);
+            console.info("Version set or updated in collection", collectionName, "to", versionString);
+        } catch (error) {
+            console.error("Version set failed", error);
+            throw error;
+        }
     }
 
     /**
@@ -153,9 +160,9 @@ export class Config {
 
         try {
             const result = await this.db.command(command);
-            console.info("Schema validation applied successfully:", JSON.stringify(result));
+            console.info("Schema validation applied successfully:", collectionName, JSON.stringify(result));
         } catch (error) {
-            console.error("Failed to apply schema validation:", error);
+            console.error("Failed to apply schema validation:", collectionName, error, JSON.stringify(schema));
             throw error;
         }
     }
@@ -226,6 +233,7 @@ export class Config {
             return;
         }
 
+        // Create the Indexes
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.createIndexes(indexes);
@@ -234,6 +242,7 @@ export class Config {
             console.error("Failed to add indexes:", collectionName, indexes, error);
             throw error;
         }
+
     }
 
     /**
@@ -271,7 +280,7 @@ export class Config {
         if (names.length < 1) {
             return;
         }
-        
+
         try {
             const collection = await this.getCollection(collectionName);
             for (const name of names) {
@@ -315,7 +324,7 @@ export class Config {
         
         try {
             const collection = await this.getCollection(collectionName);
-            const result = await collection.insertMany(data);
+            const result = await collection.insertMany(EJSON.deserialize(data));
             console.info("Bulk load successful: ", JSON.stringify(result));
         } catch (error) {
             console.error("Failed to perform bulk load:", error);

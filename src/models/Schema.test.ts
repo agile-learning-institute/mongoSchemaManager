@@ -21,32 +21,75 @@ describe('Schema', () => {
     });
 
     test('test msmType', () => {
+        const schemaInput = {"bsonType":"object","properties":{"name":{"description":"aDescription","msmType":"msmWord"}}};
+        const typeInput = {"bsonType": "string","pattern": "foo"};
+        const expectedOutput = {"bsonType":"object","properties":{"name":{"description":"aDescription","bsonType":"string","pattern":"foo",}}};
+
+        configMock.getSchema.mockReturnValue(schemaInput);
+        configMock.getType.mockReturnValue(typeInput);
+
+        let schemaLoader = new Schema(configMock, "people", v1);
+        let theSchema = schemaLoader.getSchema();
+        expect(theSchema).toStrictEqual(expectedOutput);
+    });
+
+    test('test msmType Recursive Object', () => {
+        const schemaInput = {"bsonType":"object","properties":{"name":{"description":"aDescription","msmType":"fullName"}}};
+        const fullNameType = {"bsonType":"object","properties":{"firstName":{"description":"Thepersonsfirstname","msmType":"msmWord"},"lastName":{"description":"Thepersonslastname","msmType":"msmWord"}},"additionalProperties":false};
+        const msmWordType = {"bsonType": "string","pattern": "^[^\\s]{0,32}$"};
+        const expectedOutput = {"bsonType":"object","properties":{"name":{"description":"aDescription","bsonType":"object","properties":{"firstName":{"description":"Thepersonsfirstname","bsonType":"string","pattern":"^[^\\s]{0,32}$"},"lastName":{"description":"Thepersonslastname","bsonType":"string","pattern":"^[^\\s]{0,32}$"}},"additionalProperties":false}}};
+
+        configMock.getSchema.mockReturnValue(schemaInput);
+        configMock.getType.mockReturnValueOnce(fullNameType)
+                          .mockReturnValue(msmWordType);
+
+        let schemaLoader = new Schema(configMock, "people", v1);
+        let theSchema = schemaLoader.getSchema();
+        expect(theSchema).toStrictEqual(expectedOutput);
+    });
+
+    test('test msmType Recursive Array', () => {
         const schemaInput = {
             "bsonType": "object",
             "properties": {
-                "name": {
-                    "description": "aDescription",
-                    "msmType": "msmWord"
+                "paragraph": {
+                    "description": "a Paragraph of Text",
+                    "msmType": "msmParagraph"
                 }
             }
-        }
-        const typeInput = {
-            "bsonType": "string",
-            "pattern": "foo"
         };
+
+        const msmParagraphType = {
+            "bsonType": "array",
+            "items": {
+                "description": "Sentences",
+                "msmType": "msmSentence"
+            }         
+        };
+
+        const msmSentenceType = {
+            "bsonType": "string",
+            "pattern": ".*132"
+        };
+
         const expectedOutput = {
             "bsonType": "object",
             "properties": {
-                "name": {
-                    "description": "aDescription",
-                    "bsonType": "string",
-                    "pattern": "foo",
+                "paragraph": {
+                    "description": "a Paragraph of Text",
+                    "bsonType": "array",
+                    "items": {
+                        "description": "Sentences",
+                        "bsonType": "string",
+                        "pattern": ".*132"
+                    } 
                 }
             }
         };
 
         configMock.getSchema.mockReturnValue(schemaInput);
-        configMock.getType.mockReturnValue(typeInput);
+        configMock.getType.mockReturnValueOnce(msmParagraphType)
+                          .mockReturnValue(msmSentenceType);
 
         let schemaLoader = new Schema(configMock, "people", v1);
         let theSchema = schemaLoader.getSchema();

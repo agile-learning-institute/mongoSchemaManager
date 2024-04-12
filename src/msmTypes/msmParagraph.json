@@ -1,7 +1,7 @@
 {
 	"bsonType": "array",
-	"description": "A list of sentences",
 	"items": {
+		"description": "Sentences",
 		"msmType": "msmSentence"
 	} 
 
