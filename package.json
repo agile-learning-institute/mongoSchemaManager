@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@types/jest": "^29.5.12",
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.3"
@@ -9,6 +10,11 @@
     "mongodb": "^6.5.0"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc",
+    "prestart": "npm run build",
+    "start": "cross-env CONFIG_FOLDER=./test/resources node ./dist/CollectionProcessor.js",
+    "containerize": "docker build --file src/docker/Dockerfile --tag ghcr.io/agile-learning-institute/mongoSchemaManager:latest .",
+    "container": "docker run -d -v ./test/resources:/opt/mongoSchemaManager/config --name msm ghcr.io/agile-learning-institute/mongoSchemaManager:latest"
   }
 }

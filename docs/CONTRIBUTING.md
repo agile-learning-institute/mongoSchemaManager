@@ -6,9 +6,14 @@ Thank you very much for your interest in contributing. Please feel free use gitH
 - npm
 - Docker
 
-## Install
+## Install Dependencies
 ```bash
 npm install
+```
+
+## Compile Typescript code
+```bash
+npm run build
 ```
 
 ## Run Jest Unit Tests
@@ -16,14 +21,10 @@ npm install
 npm run test
 ```
 
-## Run Local Test
+## Run Script Locally 
+NOTE: This uses the configurations in the test/resources folder. 
 ```bash
-npm run process
-```
-
-## Package for Distribution
-```bash
-npm run build
+npm run start
 ```
 
 ## Build Container Locally
@@ -31,8 +32,8 @@ npm run build
 npm run containerize
 ```
 
-## Test Container Locally
+## Test Container locally
+NOTE: This mounts the configurations from test/resources into the container
 ```bash
-mount /test/resources to /opt/mongoSchemaManager/config
-docker run
+npm run container
 ```
