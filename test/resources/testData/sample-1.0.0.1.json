@@ -1,0 +1,12 @@
+[
+  {
+    "_id": {"$oid": "000000000000000000000001"},
+    "userName": "Jane Doe",
+    "status": "Active"
+  },
+  {
+    "_id": {"$oid": "000000000000000000000002"},
+    "userName": "James Doe",
+    "status": "Archived"
+ }
+]

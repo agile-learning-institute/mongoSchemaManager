@@ -1,0 +1,103 @@
+{
+	"description": "SchemaManager Collection Configuration",
+	"type": "object",
+	"example": {
+		"name": "plans",
+		"versions": [
+			{
+				"version": "1.0.0.0",
+				"dropIndexes": ["typeIndex"],
+				"aggregations": [
+				  [
+					{"$addFields": {"name": {"$concat": ["$firstName", " ", "$lastName"]}}},
+					{"$merge": {"into": "plans","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+				  ],[
+					{"$unset": ["firstName", "lastName"]},
+					{"$merge": {"into": "plans","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+				  ]
+				],
+				"addIndexes": [
+				  {
+					"name": "nameIndex","key": { "userName": 1 },"options": { "unique": true }
+				  }, {
+					"name": "typeIndex","key": { "type": 1 },"options": { "unique": false }
+				  }
+				]
+			}
+		]
+	},
+	"required": [
+		"name",
+		"versions"
+	],
+	"properties": {
+		"name": {
+			"description": "The collection name",
+			"type": "string"
+		},
+		"versions": {
+			"type": "array",
+			"items": {
+				"description": "A version of the collection",
+				"type": "object",
+				"required": [
+					"version"
+				],
+				"properties": {
+					"version": {
+						"description": "The Version Number",
+						"type": "string"
+					},
+					"testData": {
+						"description": "Name of test data file from the testData folder to laod",
+						"type": "string"
+					},
+					"dropIndexes": {
+						"description": "List of indexs to drop",
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					},
+					"aggregations": {
+						"description": "A list of migrations to run",
+						"type": "array",
+						"items": {
+							"description": "The migration pipeline",
+							"type": "array"
+						}
+					},
+					"addIndexes": {
+						"description": "List of indexes to Add",
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": [
+								"name", 
+								"keys",
+								"options"
+							],
+							"properties": {
+								"name": {
+									"description": "The unique index name",
+									"type": "string"
+								},
+								"keys": {
+									"description": "The index key fields",
+									"type": "object"
+								},
+								"options": {
+									"description": "The index options",
+									"type": "object"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	},
+	"additionalProperties": false
+}
