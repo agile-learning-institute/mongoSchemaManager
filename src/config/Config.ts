@@ -129,7 +129,6 @@ export class Config {
         }
         const collection = await this.getCollection(collectionName);
         const versionDocument = await collection.findOne({ name: "VERSION" });
-        console.info("getVersion from collection", collectionName, "found", JSON.stringify(versionDocument));
         return versionDocument ? versionDocument.version : "0.0.0.0";
     }
 
@@ -181,7 +180,6 @@ export class Config {
         }
         const validationRules = collections[0].options?.validator || {};
 
-        console.info("Get Schema Rules:", JSON.stringify(validationRules));
         return validationRules;
     }
 
@@ -223,12 +221,17 @@ export class Config {
             throw new Error("Database not connected");
         }
 
+        // If no indexes are provided don't try to add them.
+        if (indexes.length < 1) {
+            return;
+        }
+
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.createIndexes(indexes);
             console.info("Indexes added successfully:", JSON.stringify(result));
         } catch (error) {
-            console.error("Failed to add indexes:", error);
+            console.error("Failed to add indexes:", collectionName, indexes, error);
             throw error;
         }
     }
@@ -264,6 +267,11 @@ export class Config {
             throw new Error("Database not connected");
         }
 
+        // if no names are provided, don't try to drop
+        if (names.length < 1) {
+            return;
+        }
+        
         try {
             const collection = await this.getCollection(collectionName);
             for (const name of names) {
