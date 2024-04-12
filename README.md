@@ -13,7 +13,7 @@ mongoSchemaManager is an **Open Source**, **MongoDB**, **Containerized**, **Conf
 - The only prerequisite for using this tool is [Docker](https://www.docker.com/products/docker-desktop/) and a [MongoDB](https://hub.docker.com/_/mongo) to manage.
 
 ## Reference
-This tool works by connecting to a mongoDB, reading the configurations you provide and then creating the collections, schemas, and indexes described in those configurations. See [here](./REFERENCE.md) for information on the different configuration options that are available. 
+This tool works by connecting to a mongoDB, reading the configurations you provide and then creating the collections, schemas, and indexes described in those configurations. See [here](./docs/REFERENCE.md) for information on the different configuration options that are available. 
 
 ## Contributing
-If you are interested in contributing to this work you can find information on how to do that [here](./CONTRIBUTING.md).
+If you are interested in contributing to this work you can find information on how to do that [here](./docs/CONTRIBUTING.md).
