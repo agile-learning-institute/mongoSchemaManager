@@ -25,7 +25,7 @@ export class Schema {
         this.preProcessMsmEnums();
         this.preProcessMsmEnumList();
 
-        console.log("INFO", "Schema For Collection:" + collection, "Version:" + version, "Schema:" + JSON.stringify(this.schema)); 
+        console.info("Schema For Collection:" + collection, "Version:" + version.getVersionString(), "Schema:" + JSON.stringify(this.schema)); 
     }
 
     /**

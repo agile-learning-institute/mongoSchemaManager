@@ -38,6 +38,8 @@ export class Version {
      * This is where the magic happens
      */
     public async apply(): Promise<void> {
+        console.info("Applying", this.collection, this.versionNumber.getVersionString());
+
         this.config.clearSchemaValidation(this.collection);
 
         // Drop indexes
