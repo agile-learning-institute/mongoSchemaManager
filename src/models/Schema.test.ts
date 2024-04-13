@@ -101,4 +101,17 @@ describe('Schema', () => {
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });
+
+    test('test msmEnum and msmEnumList in array of object', () => {
+        const schemaInput = {"bsonType":"object","properties":{"list":{"description":"A list for testing","bsonType":"array","items":{"bsonType":"object","properties":{"type":{"description":"A type of list object","msmEnums":"type"},"tags":{"description":"A list of enumerated values","msmEnumList":"tags"}}}}}};
+        const enums = { "one": "oneDescription", "two": "twoDescription" };
+        const expectedOutput = {"bsonType":"object","properties":{"list":{"description":"A list for testing","bsonType":"array","items":{"bsonType":"object","properties":{"type":{"description":"A type of list object","bsonType":"string","enum":["one","two"]},"tags":{"description":"A list of enumerated values","bsonType":"array","items":{"bsonType":"string","enum":["one","two"]}}}}}}};
+
+        configMock.getSchema.mockReturnValue(schemaInput);
+        configMock.getEnums.mockReturnValue(enums);
+
+        let schemaLoader = new Schema(configMock, "people", v1);
+        let theSchema = schemaLoader.getSchema();
+        expect(theSchema).toStrictEqual(expectedOutput);
+    });
 });
