@@ -114,4 +114,17 @@ describe('Schema', () => {
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });
+
+    test('test aray of msmEnum', () => {
+        const schemaInput = {"bsonType":"object","properties":{"list":{"description":"A list for testing","bsonType":"array","items":{"msmEnums":"type"}}}};
+        const enums = { "one": "oneDescription", "two": "twoDescription" };
+        const expectedOutput = {"bsonType":"object","properties":{"list":{"description":"A list for testing","bsonType":"array","items":{"bsonType":"string","enum":["one","two"]}}}};
+
+        configMock.getSchema.mockReturnValue(schemaInput);
+        configMock.getEnums.mockReturnValue(enums);
+
+        let schemaLoader = new Schema(configMock, "people", v1);
+        let theSchema = schemaLoader.getSchema();
+        expect(theSchema).toStrictEqual(expectedOutput);
+    });
 });
