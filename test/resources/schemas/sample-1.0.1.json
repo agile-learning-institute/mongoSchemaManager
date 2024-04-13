@@ -52,7 +52,7 @@
         },
         "phone": {
             "description": "The person's phone number",
-            "msmType": "msmPhone"
+            "msmType": "msmUsaPhone"
         },
         "word": {
             "description": "A string with no white space",
