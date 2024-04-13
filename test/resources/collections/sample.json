@@ -27,6 +27,11 @@
       "aggregations": [
         [
           {
+            "$match": {
+                "name": { "$ne": "VERSION" }
+            }
+          },
+          {
             "$addFields": {
               "fullName": {
                 "firstName": {"$arrayElemAt": [{"$split": ["$userName"," "]},0]},

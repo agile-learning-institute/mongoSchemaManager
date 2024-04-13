@@ -1,8 +1,7 @@
 {
     "bsonType": "object",
     "required": [
-        "_id",
-        "userName"
+        "_id"
     ],
     "properties": {
         "_id": {
