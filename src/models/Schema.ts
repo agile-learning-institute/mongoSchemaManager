@@ -54,14 +54,21 @@ export class Schema {
                 Object.assign(properties[key], typeDefinition); // Merge and overwrite properties
             }
     
-            // If the property type is 'object', recurse on its 'properties'
-            if (properties[key].type === 'object' && properties[key].properties) {
-                properties[key].properties = this.preProcessMsmType(properties[key].properties);
+            // If the property type is 'array' and its items are of type 'msmType', process type
+            if (properties[key].bsonType === 'array' && properties[key].items && properties[key].items.msmType) {
+                const typeDefinition = this.config.getType(properties[key].items.msmType);
+                delete properties[key].items.msmType; // Remove the msmType property
+                Object.assign(properties[key].items, typeDefinition); // Merge and overwrite properties
             }
     
             // If the property type is 'array' and its items are of type 'object', recurse on the 'items' 'properties'
-            if (properties[key].type === 'array' && properties[key].items && properties[key].items.type === 'object' && properties[key].items.properties) {
+            if (properties[key].bsonType === 'array' && properties[key].items && properties[key].items.bsonType === 'object' && properties[key].items.properties) {
                 properties[key].items.properties = this.preProcessMsmType(properties[key].items.properties);
+            }
+    
+            // If the property type is 'object', recurse on its 'properties'
+            if (properties[key].bsonType === 'object' && properties[key].properties) {
+                properties[key].properties = this.preProcessMsmType(properties[key].properties);
             }
         });
     
