@@ -110,16 +110,16 @@ export class Config {
             throw new Error("config.setVersion - Database not connected");
         }
 
+        const versionDocument = { name: "VERSION", version: versionString };
+        const filter = { name: "VERSION" };
+        const update = { $set: { version: versionString } };
+        const options = { upsert: true };
         try {
-            const versionDocument = { name: "VERSION", version: versionString };
-            const filter = { name: "VERSION" };
-            const update = { $set: versionDocument };
-            const options = { upsert: true };
             const collection = await this.getCollection(collectionName);
             await collection.updateOne(filter, update, options);
             console.info("Version set or updated in collection", collectionName, "to", versionString);
         } catch (error) {
-            console.error("Version set failed", error);
+            console.error("Version set failed", versionDocument, "Error:", error);
             throw error;
         }
     }
