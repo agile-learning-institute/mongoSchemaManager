@@ -137,11 +137,6 @@ export class Schema {
                 property = this.addEnumList(property);
             }
 
-            // If the property type is 'array' and its items are of type 'msmEnumList', process type
-            if (property.bsonType === 'array' && property.items && property.items.msmEnumList) {
-                property.items = this.addEnumList(property.items);
-            }
-
             // If the property type is 'array' and its items are of type 'object', recurse on the 'items' 'properties'
             if (property.bsonType === 'array' && property.items && property.items.bsonType === 'object' && property.items.properties) {
                 property.items.properties = this.preProcessMsmEnumList(property.items.properties);
@@ -162,7 +157,7 @@ export class Schema {
      * @returns the property with enums added
      */
     private addEnumList(property: any): any {     
-        const enumName = property.msmEnums
+        const enumName = property.msmEnumList
         const enumValues = this.config.getEnums(this.version.enums, enumName);
 
         // Add array of strings
