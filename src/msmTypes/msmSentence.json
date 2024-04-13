@@ -1,4 +1,4 @@
 {
 	"bsonType": "string",
-	"pattern": "TODO: Regex for 128 char - only whitespace allowed is a space (no /t/c/n)"
+	"pattern": "^[a-zA-Z0-9]{128}$"
 }
