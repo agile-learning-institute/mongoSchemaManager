@@ -17,18 +17,18 @@ Collection configuration files, found in the collections folder, drive all of ms
 ### Collection Version Numbers
 Schema version numbers follow the semantic versioning practice, and add a Enumerators overlay. Schema version numbers consist of 4 numbers seperated by periods (.) with the following meanings:
 
-- Major: Will change with significan breaking changes. These are usually acompanied by migrations and index changes.
+- Major: Will change with significant breaking changes. These are usually acompanied by migrations and index changes.
 - Minor: Will change with minimal loss of functionality, increasing a constraint or removing depricated properties. 
 - Patch: Will change with minor, non-breaking changes such as adding new properties, or changing indexes. 
 - Enumerators: Will refer to the version of system enumerators used in schema pre-processing. 
 
 ### Enumerations
-Enumerations are A gold standard with regard to data quality. There are however complications that impede their use, but msm has a way to address those complications and simplify the use of a numerators. The use of enum schema constraints typically face three problems:
+Enumerations are A gold standard with regard to data quality. There are however complications that impede their use, but msm has a way to address those complications and simplify the use of enumerators. The use of enum schema constraints typically faces three problems:
 - they don't describe the values
 - the UI needs to know them
 - they can't be reused by different collections
 
-msm uses the ``enumerators/enumerators.json`` file, which provides descriptions in addition to the enumerated values. This data is used during schema pre-processing to support re-use. The msm process will creates a enumerators collection that contains this data so that it can be served to UI consumers. Here is a sample enumerators file with 3 versions.
+msm uses the ``enumerators/enumerators.json`` file, which provides descriptions in addition to the enumerated values. This data is used during schema pre-processing to support re-use. The msm process will create an enumerators collection that contains this data so that it can be served to UI consumers. Here is a sample enumerators file with 3 versions.
 ```json
 [
     {
@@ -69,6 +69,11 @@ msm uses the ``enumerators/enumerators.json`` file, which provides descriptions 
 ```
 This information is always loaded into the Enumerators collection, and is used by enum [Schema Pre-Processing directives](#schema-pre-processing).
 
+A note on enumerator volatility. Most data fields can be enumerated, however in cases where the enumerated list is higly volatile and users can 
+create new values, then use of the enum constraint is not appropriate. That being said - most data fields will see their enumerator list remain 
+highly static after some initial growth. The msm tool makes it very easy to add a new enumerated value to the system, so in cases where the volitality 
+is unknown you can start with a enum constraint, and if the volatility doesn't settle in the first few months of use, refactor to a more appropriate pattern. 
+
 ## Version Processing
 When msm is processing a collection, the current version of the collection is examined, and if a newer version is provided then that version is "implemented" by executing the following steps in order:
 - Remove schema validation from the collection
@@ -82,7 +87,7 @@ When msm is processing a collection, the current version of the collection is ex
 This is repeated until the newest collection version has been implemented.
 
 ## Indexing
-Having proper indexing in places a key element of making sure that databases perform properly. The ``addIndexs`` property of the version allows you to add any number of indexes to a collection. Indexes are provided in standard Mongo format, but the name property is required. For example:
+Having proper indexing in places is a key element of making sure that your database is performant. The ``addIndexs`` property of the version allows you to add any number of indexes to a collection. Indexes are provided in standard Mongo format, but the name property is required. For example:
 
 ```json
 "addIndexes": [
@@ -101,12 +106,17 @@ Having unused indexes creates unnecessary overhead on insert and update operatio
 ```
 
 ## Migration Pipelines
-Not all scheme of changes can be handled by simply loading a new schema. Unfortunately sometimes a migration is required to change the data in the database to comply with a new schema. Mongo aggregation pipelines specified in the ``aggregations`` attribute are executed to facilitate this functionality. Any Mongo DB aggregation pipeline will run but here are some examples to get you started:
+Not all schema changes can be handled by simply loading a new schema. Unfortunately sometimes a migration is required to change the data in the database to comply with a new schema. Mongo aggregation pipelines specified in the ``aggregations`` attribute are executed to facilitate this functionality. Any Mongo DB aggregation pipeline will run but here are some examples to get you started:
 
 ### Add new property with default values
 ```json
 "aggregations": [
     [
+        {
+            "$match": {
+                "name": { "$ne": "VERSION" }
+            }
+        },
         {
             "$addFields": {
                 "newProperty": "Default Value"
@@ -170,7 +180,7 @@ Not all scheme of changes can be handled by simply loading a new schema. Unfortu
 ```
 
 ## Schema Pre-Processing
-The schema's processed by msm can be any valid mongo DB schema. However the tool provides several schema pre-processing directives that can be used to introduce reusable custom types, or enumerations more easily. These Directives are msm type descriptions that take the place of a bson type attribute in your schema. During pre-processing these msm type properties are replaced with the appropriate bson schema components.
+The schema's processed by msm can be any valid mongoDB schema. However the tool provides several schema pre-processing directives that can be used to introduce reusable custom types, or enumerations more easily. These Directives are msm type descriptions that take the place of a bson type attribute in your schema. During pre-processing these msm type properties are replaced with the appropriate bson schema components.
 
 Schema file names are 3-element version specific, that is to say if the collection configuration file has a collection name of ``sample`` and a collection version of ``1.2.3.4`` the tool will look for a schema file with the name ``sample-1.2.3.json`` and use ``"version": 4``of the system enumerations when processing the schema. 
 
@@ -210,7 +220,7 @@ the resulting schema that is applied will be
 }
 ```
 
-In addition to the top custom types that you create MSM introduces a number of new primitives that are easy for you to use, for example
+msm introduces a set of custom types that represent a new set of type primitives.
 
 Given a schemas/collection.json with
 ```json
@@ -320,16 +330,15 @@ The schema applied will be
 ```
 
 ## Loading Test Data
-If a test data property is provide in a collection version
+If a test data property is provided in a collection version it is the file name (without a json extension)
 ```json
-"testData": "sample-1.0.0.2.json"
+"testData": "sample-1.0.0.2"
 ```
+The contents of testData/sample-1.0.0.2.json will read and bulk loaded into the collection when the version is applied. 
 
-then the contents of that file will be bulk loaded into the collection when the version is applied. 
-
-Test data is pre-processed by the **TBD** library which handles bson primitives such as:
+Test data is pre-processed by the mongo [EJSON](https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/) library which handles bson primitives such as:
 ```json
-"_id_": {"$oid":"123456789012345678901234"}
+"_id": {"$oid":"123456789012345678901234"}
 "date": {"$date": "2/27/2024 18:17:58"}
 ```
 
