@@ -22,18 +22,15 @@ npm run test
 ```
 
 ## Run Script Locally 
-NOTE: This uses the configurations in the test/resources folder. 
+NOTE: This uses the configurations in the test/resources folder, and assumes that a mongodb database is available at localhost. See [Config.mongo.test.ts](../src/config/Config.mongo.test.ts) for information on how to run a mongo container.
 ```bash
 npm run start
 ```
 
-## Build Container Locally
-```bash
-npm run containerize
-```
+## Test Container Locally
+This command will build the contaienr locally, and start a mongodb container, and start the msm container when the database is healthy. The ``test/resrouces`` folder is mounted as the configurations folder used.
 
-## Test Container locally
-NOTE: This mounts the configurations from test/resources into the container
+You can use ``docker logs`` to check the output logs from the msm container to verify that it comleted correctly.
 ```bash
 npm run container
 ```
