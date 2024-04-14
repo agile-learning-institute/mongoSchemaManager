@@ -9,12 +9,13 @@ RUN npm install
 # Build server deployment 
 COPY . .
 RUN npm run build
+COPY src/msmTypes dist/msmTypes
 
 # Record build time
 RUN DATE=$(date "+%Y-%m-%d:%H:%M:%S") && \
-    echo $DATE > ./dist/VERSION
+    echo $DATE > dist/VERSION
 
-# Deployment stage
+# Final Stage
 FROM node:16 AS run
 
 # Default Environment Variable config values
@@ -24,10 +25,12 @@ FROM node:16 AS run
 # ENV DB_NAME=test
 # ENV LOAD_TEST_DATA=false
 
-# Copy built assets from build stage 
-COPY --from=build /dist /opt/mongoSchemaManager
-# Copy msm global custom times to the container
-COPY --from=build /src/msmTypes /opt/mongoSchemaManager/msmTypes
+# Set the working directory
+WORKDIR /opt/mongoSchemaManager
 
-# Run msm
-ENTRYPOINT ["node /opt/mongoSchemaManager/CollectionProcessor.js"]
+# Copy built assets from build stage 
+COPY --from=build /app/dist /opt/mongoSchemaManager
+COPY --from=build /app/node_modules /opt/mongoSchemaManager/node_modules
+
+# Run the processor
+ENTRYPOINT ["node", "CollectionProcessor.js"]
