@@ -11,13 +11,15 @@ describe('Config', () => {
     // Clear all mocks before each test
     beforeEach(() => {
         process.env.CONFIG_FOLDER = "./test/resources";
+        process.env.MSM_TYPES = "./src/msmTypes";
         config = new Config();
+        process.env.MSM_TYPES = "";
         process.env.CONFIG_FOLDER = "";
     });
 
     test('test constructor defaults', () => {
         config = new Config();
-        expect(config.getConfigFolder()).toBe("/opt/mongoSchemaManager/config");
+        expect(config.getConfigFolder()).toBe("/opt/mongoSchemaManager/configurations");
         expect(config.getMsmTypesFolder()).toBe("/opt/mongoSchemaManager/msmTypes");
         expect(config.shouldLoadTestData()).toBe(false);
     });
@@ -39,7 +41,7 @@ describe('Config', () => {
 
     test('test getCollectionFiles error', () => {
         const config = new Config();
-        expect(() => config.getCollectionFiles()).toThrow("ENOENT: no such file or directory, scandir '/opt/mongoSchemaManager/config/collections'");
+        expect(() => config.getCollectionFiles()).toThrow("ENOENT: no such file or directory, scandir '/opt/mongoSchemaManager/configurations/collections'");
     });
 
     test('test getCollectionConfig', () => {
