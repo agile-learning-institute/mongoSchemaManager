@@ -8,7 +8,7 @@
     "prepackage": "npm run build",
     "package": "pkg .",
     "prestart": "npm run build",
-    "start": "cross-env CONFIG_FOLDER=./test/resources node ./dist/CollectionProcessor.js",
+    "start": "cross-env CONFIG_FOLDER=./test/resources MSM_TYPES=./src/msmTypes node ./dist/CollectionProcessor.js",
     "containerize": "docker build --tag ghcr.io/agile-learning-institute/msm:latest .",
     "precontainer": "npm run containerize && docker compose down",
     "container": "docker compose up --detach"
