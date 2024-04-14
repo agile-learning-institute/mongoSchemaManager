@@ -169,10 +169,10 @@ Not all schema changes can be handled by simply loading a new schema. Unfortunat
     },
     {
         "$merge": {
-            "into": "collectionName",  // Merge into the same collection
-            "on": "_id",  // Match documents based on their `_id`
-            "whenMatched": "replace",  // Replace the existing documents
-            "whenNotMatched": "discard"  // Discard any non-matching documents (which should not occur in this scenario)
+            "into": "collectionName",  
+            "on": "_id",  
+            "whenMatched": "replace",  
+            "whenNotMatched": "discard"  
         }
     }
 ]
@@ -180,7 +180,7 @@ Not all schema changes can be handled by simply loading a new schema. Unfortunat
 ```
 
 ## Schema Pre-Processing
-The schema's processed by msm can be any valid mongoDB schema. However the tool provides several schema pre-processing directives that can be used to introduce reusable custom types, or enumerations more easily. These Directives are msm type descriptions that take the place of a bson type attribute in your schema. During pre-processing these msm type properties are replaced with the appropriate bson schema components.
+The schema's processed by msm can be any valid mongoDB schema. However the tool provides several schema pre-processing directives that can be used to introduce reusable custom types, or enumerations more easily. These Directives are msm type descriptions that take the place of a bsonType attribute in your schema. During pre-processing these msm type properties are replaced with the appropriate bson schema components.
 
 Schema file names are 3-element version specific, that is to say if the collection configuration file has a collection name of ``sample`` and a collection version of ``1.2.3.4`` the tool will look for a schema file with the name ``sample-1.2.3.json`` and use ``"version": 4``of the system enumerations when processing the schema. 
 
@@ -241,15 +241,16 @@ the resulting schema that is applied will be
         "name": {
             "description": "A user name",
             "bsonType": "string",
-	        "pattern": "^[^\\s]{0,32}$"        }
+	        "pattern": "^[^\\s]{0,32}$"
+        }
     }
 }
 ```
 
-For a list of the available msmType primitives, see files in [the msmTypes folder](./src/msmTypes/)
+For a list of the available msmType primitives, see files in [the msmTypes folder](../src/msmTypes/)
 
 ### msmEnums
-The msmEnums directive is used to provide an enumerated list of valid values from the system in enumerators file for a property. For example:
+The msmEnums directive is used to provide an enumerated list of valid values, from the system enumerators file, for a property. For example:
 
 Given a schemas/collection.json with
 ```json
@@ -330,11 +331,12 @@ The schema applied will be
 ```
 
 ## Loading Test Data
-If a test data property is provided in a collection version it is the file name (without a json extension)
+If a test data property is provided in the collection version configuration, it is the file name (without a json extension)
 ```json
 "testData": "sample-1.0.0.2"
 ```
-The contents of testData/sample-1.0.0.2.json will read and bulk loaded into the collection when the version is applied. 
+If the LOAD_TEST_DATA configuration value is set to ``true`` then the contents of testData/sample-1.0.0.2.json will read 
+and bulk loaded into the collection when the version is applied. 
 
 Test data is pre-processed by the mongo [EJSON](https://www.mongodb.com/docs/manual/reference/mongodb-extended-json/) library which handles bson primitives such as:
 ```json
