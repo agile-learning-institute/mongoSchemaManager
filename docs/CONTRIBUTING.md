@@ -30,7 +30,7 @@ npm run start
 ## Test Container Locally
 This command will build the contaienr locally, and start a mongodb container, and start the msm container when the database is healthy. The ``test/resrouces`` folder is mounted as the configurations folder used.
 
-You can use ``docker logs`` to check the output logs from the msm container to verify that it comleted correctly.
+You can use ``docker logs`` to check the output logs from the msm container to verify that it completed correctly.
 ```bash
 npm run container
 ```
