@@ -12,7 +12,7 @@ At runtime the schema manager will read configuration from the following collect
 - **testData** - test data files 
 
 ## collections configuration files
-Collection configuration files, found in the collections folder, drive all of msm processing. A single configuration file will conform to the [configuration file schema](./docs/config-schema.json), and describe a collection and how it changes over time. Each version of the collection has a Version Number and a schema document. The configuration of a version of the collection may also specify test data to be loaded, indexes to be created or dropped, and migrations that need to be run to update the data.
+Collection configuration files, found in the collections folder, drive all of msm processing. A single configuration file will conform to the [configuration file schema](./config-schema.json), and describe a collection and how it changes over time. Each version of the collection has a Version Number and a schema document. The configuration of a version of the collection may also specify test data to be loaded, indexes to be created or dropped, and migrations that need to be run to update the data.
 
 ### Collection Version Numbers
 Schema version numbers follow the semantic versioning practice, and add a Enumerators overlay. Schema version numbers consist of 4 numbers seperated by periods (.) with the following meanings:
