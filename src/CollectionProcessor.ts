@@ -15,12 +15,18 @@ export class CollectionProcessor {
       await this.config.connect();
       const collectionFiles = this.config.getCollectionFiles();
 
+      // Process all collection files
       for (const fileName of collectionFiles) {
         console.info("Processing", fileName);
         const collectionData = this.config.getCollectionConfig(fileName);
         const theCollection = new Collection(this.config, collectionData);
         await theCollection.processVersions();
       }
+
+      // Write enumerators collection
+      await this.config.setVersion("enumerators", "0.0.0.0");
+      await this.config.bulkLoad("enumerators", this.config.getEnumerators());
+
     } catch (e) {
       console.error(e);
       await this.config.disconnect();

@@ -362,6 +362,13 @@ export class Config {
     }
 
     /**
+     * Get the full enumerators list
+     */
+    public getEnumerators(): any {
+        return this.enumerators;
+    }
+
+    /**
      * Get the collection configuration files from the collections folder
      * 
      * @returns array of file names

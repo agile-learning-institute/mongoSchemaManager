@@ -34,6 +34,10 @@ describe('Config', () => {
         expect(() => config.getEnums(0, "bad")).toThrow("Enumerator does not exist:bad");
     });
 
+    test('test getEnumerators', () => {
+        expect(config.getEnumerators()[0].status).toBe("Depricated");
+    });
+
     test('test getCollectionFiles', () => {
         const files = ["sample.json"];
         expect(config.getCollectionFiles()).toStrictEqual(files);
