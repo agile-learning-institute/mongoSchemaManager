@@ -24,7 +24,6 @@ export class CollectionProcessor {
       }
 
       // Write enumerators collection
-      await this.config.setVersion("enumerators", "0.0.0.0");
       await this.config.bulkLoad("enumerators", this.config.getEnumerators());
 
     } catch (e) {
