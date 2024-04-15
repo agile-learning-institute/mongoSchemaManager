@@ -1,0 +1,18 @@
+{"schemas": [
+    {
+        "collection": "sample", 
+        "versions": [
+            "1.0.0.1",
+            "1.0.0.2",
+            "1.0.1.3"
+        ]
+    },
+    {
+        "collection": "test", 
+        "versions": [
+            "1.0.0.0",
+            "2.0.0.4"
+        ]
+    }
+
+]}
