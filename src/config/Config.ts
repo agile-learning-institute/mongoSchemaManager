@@ -464,6 +464,15 @@ export class Config {
     }
 
     /**
+     * Simple Getter for configItems
+     * 
+     * @returns configItems array
+     */
+    public getConfigItems(): ConfigItem[] {
+        return this.configItems;
+    }
+
+    /**
      * Get the named configuration value, from the environment if available, 
      * then from a file if present, and finally use the provided default if not 
      * found. This will add a ConfigItem that describes where this data was found
