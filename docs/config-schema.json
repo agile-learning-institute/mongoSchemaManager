@@ -2,18 +2,19 @@
 	"description": "SchemaManager Collection Configuration",
 	"type": "object",
 	"example": {
-		"name": "plans",
+		"name": "sample",
 		"versions": [
 			{
 				"version": "1.0.0.0",
-				"dropIndexes": ["typeIndex"],
+				"testData": "sample-1.0.0.1",
+				"dropIndexes": ["oldIndex"],
 				"aggregations": [
 				  [
 					{"$addFields": {"name": {"$concat": ["$firstName", " ", "$lastName"]}}},
-					{"$merge": {"into": "plans","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+					{"$merge": {"into": "sample","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
 				  ],[
 					{"$unset": ["firstName", "lastName"]},
-					{"$merge": {"into": "plans","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+					{"$merge": {"into": "sample","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
 				  ]
 				],
 				"addIndexes": [

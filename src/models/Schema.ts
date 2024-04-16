@@ -21,11 +21,11 @@ export class Schema {
         this.config = config;
         this.version = version;
         this.schema = this.config.getSchema(collection, version);
-        this.schema.properties = this.preProcessMsmType(this.schema.properties); // Process the entire schema recursively
-        this.preProcessMsmEnums();
-        this.preProcessMsmEnumList();
+        this.schema.properties = this.preProcess(this.schema.properties, "msmType", this.addType);
+        this.schema.properties = this.preProcess(this.schema.properties, "msmEnums", this.addEnums);
+        this.schema.properties = this.preProcess(this.schema.properties, "msmEnumList", this.addEnumList);
 
-        console.log("INFO", "Schema For Collection:" + collection, "Version:" + version, "Schema:" + JSON.stringify(this.schema)); 
+        console.info("Schema For Collection:" + collection, "Version:" + version.getVersionString(), "Schema:" + JSON.stringify(this.schema));
     }
 
     /**
@@ -39,69 +39,94 @@ export class Schema {
 
     /**
      * This function recursively implements custom types that are 
-     * identified with an msmType property. msmType is replaced 
-     * with the contents of the custom type file.
+     * identified with the provided custom property. The property 
+     * is processed with the provided process function. Sub-Objects, 
+     * Arrays of Object, and Arrays of Type are recursed. 
      * 
-     * @param property 
-     * @returns 
+     * @param properties a schema properties element 
+     * @param type the directive type 
+     * @param process the helper function that implements the type 
+     * @returns the updated properties structure
      */
-    private preProcessMsmType(properties: any): any {
+    private preProcess(properties: any, type: string, process: (property: any) => any): any {
         Object.keys(properties).forEach(key => {
-            // Check if the current property itself has 'msmType'
-            if (properties[key].hasOwnProperty('msmType')) {
-                const typeDefinition = this.config.getType(properties[key].msmType);
-                delete properties[key].msmType; // Remove the msmType property
-                Object.assign(properties[key], typeDefinition); // Merge and overwrite properties
+            let property = properties[key];
+
+            // Check if the current property itself has the target directive type
+            if (property.hasOwnProperty(type)) {
+                properties[key] = process(property);
             }
-    
-            // If the property type is 'object', recurse on its 'properties'
-            if (properties[key].type === 'object' && properties[key].properties) {
-                properties[key].properties = this.preProcessMsmType(properties[key].properties);
+
+            // If the property type is 'array' and its items are of type directive, process type
+            if (property.bsonType && property.bsonType === 'array' && 
+                property.items && property.items.hasOwnProperty(type)) {
+                    properties[key].items = process(property.items);
             }
-    
+
             // If the property type is 'array' and its items are of type 'object', recurse on the 'items' 'properties'
-            if (properties[key].type === 'array' && properties[key].items && properties[key].items.type === 'object' && properties[key].items.properties) {
-                properties[key].items.properties = this.preProcessMsmType(properties[key].items.properties);
+            if (property.bsonType && property.bsonType === 'array' && property.items && 
+                property.items.bsonType === 'object' && property.items.properties) {
+                    properties[key].items.properties = this.preProcess(property.items.properties, type, process);
+            }
+
+            // If the property type is 'object', recurse on its 'properties'
+            if (property.bsonType && property.bsonType === 'object' && property.properties) {
+                properties[key].properties = this.preProcess(property.properties, type, process);
             }
         });
-    
+
         return properties;
     }
 
     /**
-     * This function processes msmEnums Directives in the schema, 
-     * by adding the corresponding values from the system enumerators 
+     * Process function to add custom type to a property
+     * 
+     * @param property the property to add custom type to
+     * @returns the property with type added
      */
-    private preProcessMsmEnums(): void {
-        Object.keys(this.schema.properties).forEach(key => {
-            const property = this.schema.properties[key];
-            if (property.hasOwnProperty('msmEnums')) {
-                const enumName = property.msmEnums;
-                const enumValues = this.config.getEnums(this.version.enums, enumName);
-                delete property.msmEnums;
-                property.bsonType = "string"; 
-                property.enum = Object.keys(enumValues);
-            }
-        });
+    private addType = (property: any): any => {
+        const typeDefinition = this.config.getType(property.msmType);
+        Object.assign(property, typeDefinition);
+
+        delete property.msmType;                
+        return property;
     }
 
     /**
-     * This function processes msmEnumList Directives in a schema, 
-     * by adding an array of strings, with enums values from the 
-     * system enumerators 
+    * Process function to add enums to a property
+    * 
+    * @param property the property to add enums to
+    * @returns the property with enums added
+    */
+    private addEnums = (property: any): any => {
+        const enumName = property.msmEnums
+        const enumValues = this.config.getEnums(this.version.enums, enumName);
+        property.bsonType = "string";
+        property.enum = Object.keys(enumValues);
+
+        delete property.msmEnums;
+        return property;
+    }
+
+
+    /**
+     * Process helper function to add array of enums to property
+     * 
+     * @param property the property to add enumsList to
+     * @returns the property with enumList added
      */
-    private preProcessMsmEnumList(): void {
-        Object.keys(this.schema.properties).forEach(key => {
-            const property = this.schema.properties[key];
-            if (property.hasOwnProperty('msmEnumList')) {
-                const enumValues = this.config.getEnums(this.version.enums, property.msmEnumList);
-                delete property.msmEnumList; 
-                property.bsonType = "array";
-                property.items = {
-                    bsonType: "string",
-                    enum: Object.keys(enumValues)
-                };
-            }
-        });
+    private addEnumList = (property: any): any => {
+        const enumName = property.msmEnumList
+        const enumValues = this.config.getEnums(this.version.enums, enumName);
+
+        // Add array of strings
+        property.bsonType = "array";
+        property.items = {
+            bsonType: "string",
+            enum: Object.keys(enumValues)
+        };
+
+        delete property.msmEnumList;
+        return property;
     }
 }

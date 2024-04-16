@@ -9,17 +9,23 @@ export class CollectionProcessor {
   }
 
   public async processCollections() {
-    console.log("Starting configuration and collection processing...");
+    console.info("Starting configuration and collection processing...");
 
     try {
       await this.config.connect();
       const collectionFiles = this.config.getCollectionFiles();
 
+      // Process all collection files
       for (const fileName of collectionFiles) {
+        console.info("Processing", fileName);
         const collectionData = this.config.getCollectionConfig(fileName);
         const theCollection = new Collection(this.config, collectionData);
         await theCollection.processVersions();
       }
+
+      // Write enumerators collection
+      await this.config.bulkLoad("enumerators", this.config.getEnumerators());
+
     } catch (e) {
       console.error(e);
       await this.config.disconnect();
@@ -36,4 +42,5 @@ export class CollectionProcessor {
   const config = new Config();
   const processor = new CollectionProcessor(config);
   await processor.processCollections();
+  config.disconnect();
 })();

@@ -38,34 +38,45 @@ export class Version {
      * This is where the magic happens
      */
     public async apply(): Promise<void> {
-        this.config.clearSchemaValidation(this.collection);
+        console.info("Applying", this.collection, this.versionNumber.getVersionString());
+
+        await this.config.clearSchemaValidation(this.collection);
 
         // Drop indexes
-        if (this.dropIndexes) {
-            this.config.dropIndexes(this.collection, this.dropIndexes);
+        if ((this.dropIndexes) && (this.dropIndexes.length > 0)) {
+            await this.config.dropIndexes(this.collection, this.dropIndexes);
+        } else {
+            console.info("No indexes to drop");
         }
 
         // Execute Aggregations
-        if (this.aggregations) {
-            this.config.executeAggregations(this.collection, this.aggregations);
+        if ((this.aggregations) && (this.aggregations.length > 0)) {
+            await this.config.executeAggregations(this.collection, this.aggregations);
+        } else {
+            console.info("No aggregations to execute");
         }
+
 
         // Add Indexes
-        if (this.addIndexes) {
-            this.config.addIndexes(this.collection, this.addIndexes);
+        if ((this.addIndexes) && (this.addIndexes.length > 0)) {
+            await this.config.addIndexes(this.collection, this.addIndexes);
+        } else {
+            console.info("No indexes to add");
         }
 
-        this.config.applySchemaValidation(this.collection, this.theSchema);
+        await this.config.applySchemaValidation(this.collection, this.theSchema);
 
         // Load Test Data
         if (this.config.shouldLoadTestData() && (this.testData)) {
-            this.config.bulkLoad(
-                this.collection,
-                this.config.getTestData(this.testData)
-            );
+            const data = await this.config.getTestData(this.testData);
+            await this.config.bulkLoad(this.collection, data);
+        } else {
+            console.info("Test data not requested");
         }
 
-        this.config.setVersion(this.collection, this.versionNumber.getVersionString())
+        await this.config.setVersion(this.collection, this.versionNumber.getVersionString())
+
+        console.info("Version Applied Successfully", this.collection, this.versionNumber.getVersionString());
     }
 
     // Simple version number getter

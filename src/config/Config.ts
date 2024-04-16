@@ -3,6 +3,7 @@ import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
 import { readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
+import { EJSON } from 'bson';
 
 /**
  * A config item, used to track where configuration values were found
@@ -33,7 +34,7 @@ export class Config {
      * Constructor gets configuration values, loads the enumerators, and logs completion
      */
     constructor() {
-        this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/config", false);
+        this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/configurations", false);
         this.msmTypesFolder = this.getConfigValue("MSM_TYPES", "/opt/mongoSchemaManager/msmTypes", false);
         this.connectionString = this.getConfigValue("CONNECTION_STRING", "mongodb://root:example@localhost:27017", true);
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
@@ -108,13 +109,19 @@ export class Config {
         if (!this.db) {
             throw new Error("config.setVersion - Database not connected");
         }
+
         const versionDocument = { name: "VERSION", version: versionString };
         const filter = { name: "VERSION" };
-        const update = { $set: versionDocument };
+        const update = { $set: { version: versionString } };
         const options = { upsert: true };
-        const collection = await this.getCollection(collectionName);
-        await collection.updateOne(filter, update, options);
-        console.info("Version set or updated in collection", collectionName, "to", versionString);
+        try {
+            const collection = await this.getCollection(collectionName);
+            await collection.updateOne(filter, update, options);
+            console.info("Version set or updated in collection", collectionName, "to", versionString);
+        } catch (error) {
+            console.error("Version set failed", versionDocument, "Error:", error);
+            throw error;
+        }
     }
 
     /**
@@ -129,7 +136,6 @@ export class Config {
         }
         const collection = await this.getCollection(collectionName);
         const versionDocument = await collection.findOne({ name: "VERSION" });
-        console.info("getVersion from collection", collectionName, "found", JSON.stringify(versionDocument));
         return versionDocument ? versionDocument.version : "0.0.0.0";
     }
 
@@ -154,9 +160,9 @@ export class Config {
 
         try {
             const result = await this.db.command(command);
-            console.info("Schema validation applied successfully:", JSON.stringify(result));
+            console.info("Schema validation applied successfully:", collectionName, JSON.stringify(result));
         } catch (error) {
-            console.error("Failed to apply schema validation:", error);
+            console.error("Failed to apply schema validation:", collectionName, error, JSON.stringify(schema));
             throw error;
         }
     }
@@ -181,7 +187,6 @@ export class Config {
         }
         const validationRules = collections[0].options?.validator || {};
 
-        console.info("Get Schema Rules:", JSON.stringify(validationRules));
         return validationRules;
     }
 
@@ -223,14 +228,21 @@ export class Config {
             throw new Error("Database not connected");
         }
 
+        // If no indexes are provided don't try to add them.
+        if (indexes.length < 1) {
+            return;
+        }
+
+        // Create the Indexes
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.createIndexes(indexes);
             console.info("Indexes added successfully:", JSON.stringify(result));
         } catch (error) {
-            console.error("Failed to add indexes:", error);
+            console.error("Failed to add indexes:", collectionName, indexes, error);
             throw error;
         }
+
     }
 
     /**
@@ -262,6 +274,11 @@ export class Config {
     public async dropIndexes(collectionName: string, names: string[]) {
         if (!this.db) {
             throw new Error("Database not connected");
+        }
+
+        // if no names are provided, don't try to drop
+        if (names.length < 1) {
+            return;
         }
 
         try {
@@ -307,7 +324,7 @@ export class Config {
         
         try {
             const collection = await this.getCollection(collectionName);
-            const result = await collection.insertMany(data);
+            const result = await collection.insertMany(EJSON.deserialize(data));
             console.info("Bulk load successful: ", JSON.stringify(result));
         } catch (error) {
             console.error("Failed to perform bulk load:", error);
@@ -342,6 +359,13 @@ export class Config {
         } else {
             throw new Error("Enumerator does not exist:" + name);
         }
+    }
+
+    /**
+     * Get the full enumerators list
+     */
+    public getEnumerators(): any {
+        return this.enumerators;
     }
 
     /**

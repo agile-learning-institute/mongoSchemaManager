@@ -1,8 +1,7 @@
 {
     "bsonType": "object",
     "required": [
-        "_id",
-        "userName"
+        "_id"
     ],
     "properties": {
         "_id": {
@@ -19,7 +18,7 @@
         },
         "userName": {
             "description": "Username",
-            "bsonType": "msmWord"
+            "msmType": "msmWord"
         },
         "status": {
             "description": "The status",
@@ -52,7 +51,7 @@
         },
         "phone": {
             "description": "The person's phone number",
-            "msmType": "msmPhone"
+            "msmType": "msmUsaPhone"
         },
         "word": {
             "description": "A string with no white space",

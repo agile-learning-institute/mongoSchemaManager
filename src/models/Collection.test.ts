@@ -35,7 +35,7 @@ describe('Collection', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         const config = new Config();
         const collectionConfig = {
-            "collectionName": "foo",
+            "name": "foo",
             "versions": [{ "version": "1.0.0" }]
         };
         const theCollection = new Collection(config, collectionConfig);
@@ -48,7 +48,7 @@ describe('Collection', () => {
     test('test process', async () => {
         const config = new Config();
         const collectionConfig = {
-            collectionName: "testCollection",
+            name: "testCollection",
             versions: [{ version: "1.0.0.0" }]
         };
 
