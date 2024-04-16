@@ -17,7 +17,7 @@ describe('Schema', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        configMock = new Config() as jest.Mocked<Config>;;
+        configMock = new Config() as jest.Mocked<Config>;
     });
 
     test('test msmType', () => {
@@ -28,7 +28,7 @@ describe('Schema', () => {
         configMock.getSchema.mockReturnValue(schemaInput);
         configMock.getType.mockReturnValue(typeInput);
 
-        let schemaLoader = new Schema(configMock, "people", v1);
+        let schemaLoader = new Schema(configMock, "sample", v1);
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });
