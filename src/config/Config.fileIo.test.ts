@@ -4,9 +4,13 @@
  */
 import { Config } from './Config';
 import { VersionNumber } from '../models/VersionNumber';
+import { join } from 'path';
+import { readFileSync } from "fs";
+import * as yaml from 'js-yaml';
 
 describe('Config', () => {
     let config: Config;
+    let versionNumber = new VersionNumber("1.0.0.0");
 
     // Clear all mocks before each test
     beforeEach(() => {
@@ -34,9 +38,17 @@ describe('Config', () => {
         expect(() => config.getEnums(0, "bad")).toThrow("Enumerator does not exist:bad");
     });
 
-    // test('test getEnumerators', () => {
-    //     expect(config.getEnumerators()[0].status).toBe("Depricated");
-    // });
+    test('test getOpenApiFolder', () => {
+        expect(config.getOpenApiFolder()).toBe("test/resources/openApi");
+    });
+
+    test('test saveSwagger', () => {
+        const swagger = {"foo":"bar"};
+        config.saveSwagger("sample", versionNumber, swagger);
+        const fileName = join(config.getOpenApiFolder(), "sample-" + versionNumber.getVersionString() + ".openapi.yaml");
+        const result = yaml.load(readFileSync(fileName, 'utf8'));
+        expect(result).toStrictEqual(swagger);
+    });
 
     test('test getCollectionFiles', () => {
         const files = ["sample.json"];

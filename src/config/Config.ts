@@ -1,9 +1,10 @@
 import { VersionNumber } from '../models/VersionNumber';
 import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
-import { readdirSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, readdirSync, existsSync, readFileSync } from "fs";
 import { join } from 'path';
 import { EJSON } from 'bson';
+import * as yaml from 'js-yaml';
 
 /**
  * A config item, used to track where configuration values were found
@@ -442,6 +443,18 @@ export class Config {
     }
 
     /**
+     * Save swagger
+     * 
+     * @param collection 
+     * @param version 
+     * @returns a schema object (NOT pre-processed)
+     */
+    public saveSwagger(collection: string, version: VersionNumber, swagger: any) {
+        const swaggerFilename = join(this.getOpenApiFolder(), collection + "-" + version.getVersionString() + ".openapi.yaml");
+        writeFileSync(swaggerFilename, yaml.dump(swagger), 'utf8');
+    }
+
+    /**
      * Read the test data file specified
      * 
      * @param filename 
@@ -459,6 +472,15 @@ export class Config {
      */
     public getConfigFolder(): string {
         return this.configFolder;
+    }
+
+    /**
+     * Simple Getter for openApi folder
+     * 
+     * @returns OpenApi folder name
+     */
+    public getOpenApiFolder(): string {
+        return join(this.configFolder, "openApi");
     }
 
     /**
