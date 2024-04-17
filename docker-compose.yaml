@@ -14,7 +14,7 @@ services:
       timeout: 2s
       retries: 15
     profiles:
-      - msmtest
+      - mongodb
       - testing
 
   msm:
@@ -27,3 +27,5 @@ services:
       CONNECTION_STRING: mongodb://root:example@mongodb-server:27017
       LOAD_TEST_DATA: "true"
     image: ghcr.io/agile-learning-institute/msm:latest
+    profiles:
+      - testing

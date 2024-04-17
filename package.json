@@ -5,13 +5,13 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "prestart": "npm run composeDown && npm run build && npm run composeDbUp",
+    "prestart": "npm run composeDown && npm run build && npm run composeUpDb",
     "start": "cross-env CONFIG_FOLDER=./test/resources MSM_TYPES=./src/msmTypes node ./dist/CollectionProcessor.js",
     "precontainer": "npm run composeDown && npm run containerize",
-    "container": "npm run composeUpTest && docker-compose logs -f 'testing'",
+    "container": "npm run composeUpTest && docker-compose logs -f 'msm'",
     "containerize": "docker build --tag ghcr.io/agile-learning-institute/msm:latest .",
-    "composeDown": "docker compose --profile msmtest down, docker compose --profile testing down",
-    "composeUpDb": "docker compose --profile msmtest up --detach",
+    "composeDown": "docker compose --profile mongodb down && docker compose --profile testing down",
+    "composeUpDb": "docker compose --profile mongodb up --detach",
     "composeUpTest": "docker compose --profile testing up --detach",
     "prepackage": "npm run build",
     "package": "pkg ."
