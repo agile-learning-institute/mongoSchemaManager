@@ -1,0 +1,15 @@
+{
+    "bsonType": "object",
+    "required": [
+        "_id"
+    ],
+    "properties": {
+        "_id": {
+            "bsonType": "objectId"
+        },
+        "name": {
+            "type": "string"
+       }
+    },
+    "additionalProperties": false
+}

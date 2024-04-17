@@ -10,6 +10,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 COPY src/msmTypes dist/msmTypes
+COPY src/app  dist/app
 
 # Record build time
 RUN DATE=$(date "+%Y-%m-%d:%H:%M:%S") && \
