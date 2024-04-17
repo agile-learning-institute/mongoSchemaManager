@@ -21,7 +21,7 @@ FROM node:16 AS run
 # Default Environment Variable config values
 # ENV CONNECTION_STRING=mongodb://root:example@localhost:27017
 # ENV CONFIG_FOLDER=/opt/mongoSchemaManager/config
-# ENV MSM_TYPES=/opt/mongoSchemaManager/msmTypes
+# ENV MSM_ROOT=/opt/mongoSchemaManager
 # ENV DB_NAME=test
 # ENV LOAD_TEST_DATA=false
 
