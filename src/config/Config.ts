@@ -26,6 +26,7 @@ export class Config {
     private client?: MongoClient;
     private db?: Db;
     private configFolder: string = "";
+    private msmVersionCollection = "msmCurrentVersions";
     private msmTypesFolder: string;
     private loadTestData: boolean;
     private enumerators: any;
@@ -110,16 +111,15 @@ export class Config {
             throw new Error("config.setVersion - Database not connected");
         }
 
-        const versionDocument = { name: "VERSION", version: versionString };
-        const filter = { name: "VERSION" };
-        const update = { $set: { version: versionString } };
-        const options = { upsert: true };
+        const filter = { "collectionName": collectionName };
+        const update = { "$set": { "currentVersion": versionString } };
+        const options = { "upsert": true };
         try {
-            const collection = await this.getCollection(collectionName);
+            const collection = await this.getCollection(this.msmVersionCollection);
             await collection.updateOne(filter, update, options);
-            console.info("Version set or updated in collection", collectionName, "to", versionString);
+            console.info("Version set or updated for collection", collectionName, "to", versionString);
         } catch (error) {
-            console.error("Version set failed", versionDocument, "Error:", error);
+            console.error("Version set failed", collectionName, versionString, "Error:", error);
             throw error;
         }
     }
@@ -134,9 +134,9 @@ export class Config {
         if (!this.db) {
             throw new Error("config.getVersion - Database not connected");
         }
-        const collection = await this.getCollection(collectionName);
-        const versionDocument = await collection.findOne({ name: "VERSION" });
-        return versionDocument ? versionDocument.version : "0.0.0.0";
+        const collection = await this.getCollection(this.msmVersionCollection);
+        const versionDocument = await collection.findOne({ collectionName: collectionName });
+        return versionDocument ? versionDocument.currentVersion : "0.0.0.0";
     }
 
     /**
