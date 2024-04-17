@@ -23,8 +23,9 @@ export class CollectionProcessor {
         await theCollection.processVersions();
       }
 
-      // Write enumerators collection
+      // Write enumerators collection and Swagger Viewing app
       await this.config.loadEnumerators();
+      await this.config.configureApp();
 
     } catch (e) {
       console.error(e);

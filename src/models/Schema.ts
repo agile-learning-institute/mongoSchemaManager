@@ -34,7 +34,7 @@ export class Schema {
         const info = {"title":collection, "version": version.getVersionString()};
         const pathName = "/" + collection + "/";
         const path: any = {};
-        path[pathName] = {"get": {"responses": {"200": {"content": {"application/json": {"schema":{"$ref":"#/components/schemas/" + collection}}}}}}}; 
+        path[pathName] = {"get": {"responses": {"200": {"description":"Success","content": {"application/json": {"schema":{"$ref":"#/components/schemas/" + collection}}}}}}}; 
         const components: any = {"schemas": {}};
         components.schemas[collection] = swaggerSchema;
 

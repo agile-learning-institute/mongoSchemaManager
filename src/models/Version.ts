@@ -15,6 +15,7 @@ export class Version {
     private addIndexes?: object[] = [];
     private testData?: string;
     private theSchema: any;
+    private theSwagger: any;
 
     /**
      * The constructor initializes the instance, 
@@ -32,6 +33,7 @@ export class Version {
 
         const schemaProcessor = new Schema(config, this.collection, this.versionNumber);
         this.theSchema = schemaProcessor.getSchema();
+        this.theSwagger = schemaProcessor.getSwagger();
     }
 
     /**
@@ -75,6 +77,8 @@ export class Version {
         }
 
         await this.config.setVersion(this.collection, this.versionNumber.getVersionString())
+
+        this.config.saveSwagger(this.collection, this.versionNumber, this.theSwagger);
 
         console.info("Version Applied Successfully", this.collection, this.versionNumber.getVersionString());
     }

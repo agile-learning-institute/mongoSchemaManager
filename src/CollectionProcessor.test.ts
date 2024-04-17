@@ -5,11 +5,12 @@ import { CollectionProcessor } from './CollectionProcessor';
 jest.mock('./config/Config', () => {
   return {
     Config: jest.fn().mockImplementation(() => ({
-      bulkLoad: jest.fn().mockReturnValue(undefined),
-      connect: jest.fn().mockResolvedValue(undefined),
-      disconnect: jest.fn().mockResolvedValue(undefined),
-      setVersion: jest.fn().mockReturnValue(undefined),
-      loadEnumerators: jest.fn().mockReturnValue(undefined),
+      bulkLoad: jest.fn(),
+      configureApp: jest.fn(),
+      connect: jest.fn(),
+      disconnect: jest.fn(),
+      setVersion: jest.fn(),
+      loadEnumerators: jest.fn(),
       getEnumerators: jest.fn().mockReturnValue([]),
       getCollectionFiles: jest.fn().mockReturnValue(['collection1.json', 'collection2.json']),
       getCollectionConfig: jest.fn().mockImplementation((fileName) => ({
@@ -47,6 +48,7 @@ describe('CollectionProcessor', () => {
     expect(config.getCollectionConfig).toHaveBeenCalledTimes(2); 
     expect(config.disconnect).toHaveBeenCalledTimes(1);
     expect(config.loadEnumerators).toHaveBeenCalledTimes(1);
+    expect(config.configureApp).toHaveBeenCalledTimes(1);
 
     expect(Collection).toHaveBeenCalledTimes(2);
   });
