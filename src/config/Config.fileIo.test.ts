@@ -52,7 +52,7 @@ describe('Config', () => {
     });
 
     test('test getCollectionFiles', () => {
-        const files = ["sample.json"];
+        const files = ["sample.json","test.json",];
         expect(config.getCollectionFiles()).toStrictEqual(files);
     });
 
