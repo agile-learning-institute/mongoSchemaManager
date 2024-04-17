@@ -17,13 +17,13 @@ npm run test
 ```
 
 ## Run Script Locally 
-NOTE: This uses the configurations in the test/resources folder, starts a mongodb container for testing
+To start a fresh mongoDB instance and run locally using the configurations in ``/test/resources`` use
 ```bash
 npm run start
 ```
 
 ## Test Container Locally
-This command will build the contaienr locally, and start a mongodb container, and then the msm container when the database is healthy. The ``test/resrouces`` folder is mounted as the configurations folder used by msm, and the log file is tailed.
+To build the container, run a fresh mongoDb instance, and run the container using ``test/resrouces`` folder
 ```bash
 npm run container
 ```
