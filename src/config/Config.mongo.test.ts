@@ -5,6 +5,8 @@
  */
 import { Collection, Db } from 'mongodb';
 import { Config } from './Config';
+import { join } from 'path';
+import { existsSync, unlinkSync } from 'fs';
 
 describe('Config', () => {
     let config: Config;
@@ -13,7 +15,12 @@ describe('Config', () => {
     let collection: Collection;
 
     beforeEach(async () => {
+        process.env.MSM_ROOT = "./src";
+        process.env.CONFIG_FOLDER = "./test/resources";
         config = new Config();
+        process.env.MSM_ROOT = "";
+        process.env.CONFIG_FOLDER = "";
+
         await config.connect();
         db = config.getDatabase();
         collection = await config.getCollection(collectionName);
@@ -130,4 +137,17 @@ describe('Config', () => {
         expect(result[1].firstName).toBe("Fab");
         expect(result[2].firstName).toBe("Bab");
     });
+
+    test('test configureApp', async () => {
+        await config.configureApp();
+
+        const indexFile = join(config.getOpenApiFolder(),"index.html");
+        const versionFile = join(config.getOpenApiFolder(),"versions.json");
+        expect(existsSync(indexFile)).toBe(true);
+        expect(existsSync(versionFile)).toBe(true);
+
+        unlinkSync(indexFile);
+        unlinkSync(versionFile);
+    });
+
 });

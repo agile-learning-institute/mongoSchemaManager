@@ -5,7 +5,7 @@
 import { Config } from './Config';
 import { VersionNumber } from '../models/VersionNumber';
 import { join } from 'path';
-import { readFileSync } from "fs";
+import { unlinkSync, readFileSync } from "fs";
 import * as yaml from 'js-yaml';
 
 describe('Config', () => {
@@ -44,10 +44,11 @@ describe('Config', () => {
 
     test('test saveSwagger', () => {
         const swagger = {"foo":"bar"};
-        config.saveSwagger("sample", versionNumber, swagger);
-        const fileName = join(config.getOpenApiFolder(), "sample-" + versionNumber.getVersionString() + ".openapi.yaml");
+        config.saveSwagger("unittest", versionNumber, swagger);
+        const fileName = join(config.getOpenApiFolder(), "unittest-" + versionNumber.getVersionString() + ".openapi.yaml");
         const result = yaml.load(readFileSync(fileName, 'utf8'));
         expect(result).toStrictEqual(swagger);
+        unlinkSync(fileName);
     });
 
     test('test getCollectionFiles', () => {
@@ -94,4 +95,5 @@ describe('Config', () => {
         process.env.CONFIG_FOLDER = "";
         expect(config.shouldLoadTestData()).toBe(false);
     });
+
 });

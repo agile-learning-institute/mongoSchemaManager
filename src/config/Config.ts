@@ -1,7 +1,7 @@
 import { VersionNumber } from '../models/VersionNumber';
 import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
-import { writeFileSync, readdirSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, readdirSync, existsSync, copyFileSync, readFileSync } from "fs";
 import { join } from 'path';
 import { EJSON } from 'bson';
 import * as yaml from 'js-yaml';
@@ -339,7 +339,6 @@ export class Config {
 
     /**
      * Load the Enumerators Collection
-     * 
      */
     public async loadEnumerators() {
         if (!this.db) {
@@ -347,6 +346,22 @@ export class Config {
         }
         
         await this.bulkLoad(this.msmEnumeratorsCollection, this.enumerators);
+    }
+
+    /**
+     * Configure the swagger viewer app
+     * - Copy this.msmRootFolder + /app to this.getOpenApiFolder
+     * - Write all documents from msmVersions folder to versions.json
+     */
+    public async configureApp() {
+        const appFile = join(this.msmRootFolder, "app", "index.html");
+        const targetFile = join(this.getOpenApiFolder(), "index.html");
+        copyFileSync(appFile, targetFile);
+        
+        const versionsFile = join(this.getOpenApiFolder(), "versions.json");
+        let collection = await this.getCollection(this.msmVersionCollection);
+        let versions = await collection.find().toArray();
+        writeFileSync(versionsFile, JSON.stringify(versions), 'utf8');
     }
 
     /**
@@ -377,13 +392,6 @@ export class Config {
             throw new Error("Enumerator does not exist:" + name);
         }
     }
-
-    // /**
-    //  * Get the full enumerators list
-    //  */
-    // public getEnumerators(): any {
-    //     return this.enumerators;
-    // }
 
     /**
      * Get the collection configuration files from the collections folder
