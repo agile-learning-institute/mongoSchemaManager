@@ -127,4 +127,30 @@ describe('Schema', () => {
         let theSchema = schemaLoader.getSchema();
         expect(theSchema).toStrictEqual(expectedOutput);
     });
+
+    test('test getSwagger basics', () => {
+        const schemaInput = {"bsonType":"object", "description":"A test object", "properties":{"name":{"bsonType":"string"}}};
+        const expectedOutput = {"openapi":"3.0.3","info":{"title":"sample","version":"1.0.0.0"},"paths":{"/sample/":{"get":{"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/sample"}}}}}}}},"components":{"schemas":{"sample":{"description":"A test object", "type":"object","properties":{"name":{"type":"string"}}}}}};
+
+        configMock.getSchema.mockReturnValue(schemaInput);
+
+        let schemaLoader = new Schema(configMock, "sample", v1);
+        let theSwagger = schemaLoader.getSwagger();
+        console.debug(theSwagger);
+        expect(theSwagger).toStrictEqual(expectedOutput);
+    });
+
+    test('test getSwagger for msmEnum and msmEnumList in array of object', () => {
+        const schemaInput = {"bsonType":"object","properties":{"list":{"description":"A list for testing","bsonType":"array","items":{"bsonType":"object","properties":{"type":{"description":"A type of list object","msmEnums":"type"},"tags":{"description":"A list of enumerated values","msmEnumList":"tags"}}}}}};
+        const enums = { "one": "oneDescription", "two": "twoDescription" };
+        const expectedOutput = {"openapi":"3.0.3","info":{"title":"sample","version":"1.0.0.0"},"paths":{"/sample/":{"get":{"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/sample"}}}}}}}},"components":{"schemas":{"sample":{"type":"object","properties":{"list":{"description":"A list for testing","type":"array","items":{"type":"object","properties":{"type":{"description":"A type of list object","type":"string","enum":["one","two"]},"tags":{"description":"A list of enumerated values","type":"array","items":{"type":"string","enum":["one","two"]}}}}}}}}}};
+
+        configMock.getSchema.mockReturnValue(schemaInput);
+        configMock.getEnums.mockReturnValue(enums);
+
+        let schemaLoader = new Schema(configMock, "sample", v1);
+        let theSwagger = schemaLoader.getSwagger();
+        console.debug(theSwagger);
+        expect(theSwagger).toStrictEqual(expectedOutput);
+    });
 });

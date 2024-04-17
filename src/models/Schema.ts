@@ -6,6 +6,7 @@ import { VersionNumber } from "./VersionNumber";
  */
 export class Schema {
     private schema: any;
+    private swagger: any;
     private config: Config;
     private version: VersionNumber;
 
@@ -20,21 +21,48 @@ export class Schema {
     constructor(config: Config, collection: string, version: VersionNumber) {
         this.config = config;
         this.version = version;
+
+        // Build Schema and Preprocess
         this.schema = this.config.getSchema(collection, version);
         this.schema.properties = this.preProcess(this.schema.properties, "msmType", this.addType);
         this.schema.properties = this.preProcess(this.schema.properties, "msmEnums", this.addEnums);
         this.schema.properties = this.preProcess(this.schema.properties, "msmEnumList", this.addEnumList);
 
+        // Build Swagger and PreProcess
+        const swaggerSchema = this.setSwaggerType(JSON.parse(JSON.stringify(this.schema)));
+        swaggerSchema.properties = this.preProcess(swaggerSchema.properties, "bsonType", this.setSwaggerType);
+        const info = {"title":collection, "version": version.getVersionString()};
+        const pathName = "/" + collection + "/";
+        const path: any = {};
+        path[pathName] = {"get": {"responses": {"200": {"content": {"application/json": {"schema":{"$ref":"#/components/schemas/" + collection}}}}}}}; 
+        const components: any = {"schemas": {}};
+        components.schemas[collection] = swaggerSchema;
+
+        this.swagger = {"openapi": "3.0.3"}
+        this.swagger.info = info;
+        this.swagger.paths = path;
+        this.swagger.components = components;
+
         console.info("Schema For Collection:" + collection, "Version:" + version.getVersionString(), "Schema:" + JSON.stringify(this.schema));
+        console.info("Swagger For Collection:" + collection, "Version:" + version.getVersionString(), "Swagger:" + JSON.stringify(this.swagger));
     }
 
     /**
-     * A simple getter
+     * A simple Schema getter
      * 
      * @returns The processed schema
      */
     public getSchema(): any {
         return this.schema;
+    }
+
+    /**
+     * A simple Swagger getter
+     * 
+     * @returns The processed schema
+     */
+    public getSwagger(): any {
+        return this.swagger;
     }
 
     /**
@@ -51,31 +79,60 @@ export class Schema {
     private preProcess(properties: any, type: string, process: (property: any) => any): any {
         Object.keys(properties).forEach(key => {
             let property = properties[key];
-
+            
             // Check if the current property itself has the target directive type
+            console.debug("Processing Property", property, type);
             if (property.hasOwnProperty(type)) {
+                console.debug("HasOwn Processing");
                 properties[key] = process(property);
             }
 
             // If the property type is 'array' and its items are of type directive, process type
-            if (property.bsonType && property.bsonType === 'array' && 
-                property.items && property.items.hasOwnProperty(type)) {
-                    properties[key].items = process(property.items);
+            if (this.isArrayOfType(property, type)) {
+                properties[key].items = process(property.items);
             }
 
             // If the property type is 'array' and its items are of type 'object', recurse on the 'items' 'properties'
-            if (property.bsonType && property.bsonType === 'array' && property.items && 
-                property.items.bsonType === 'object' && property.items.properties) {
-                    properties[key].items.properties = this.preProcess(property.items.properties, type, process);
+            if (this.isArrayOfObject(property)) {
+                properties[key].items.properties = this.preProcess(property.items.properties, type, process);
             }
 
             // If the property type is 'object', recurse on its 'properties'
-            if (property.bsonType && property.bsonType === 'object' && property.properties) {
+            if (this.isObject(property)) {
                 properties[key].properties = this.preProcess(property.properties, type, process);
             }
         });
 
         return properties;
+    }
+
+    /**
+     * Helper functions to test a property
+     */
+    private isArrayOfType(property: any, type: string): boolean {
+        if (this.isArray(property) &&
+            property.items &&
+            property.items.hasOwnProperty(type)) {
+            return true;
+        }
+        return false;
+    }
+
+    private isArrayOfObject(property: any): boolean {
+        return this.isArray(property) &&
+            property.items &&
+            this.isObject(property.items);
+    }
+
+    private isArray(property: any): boolean {
+        return (property.bsonType && property.bsonType === 'array') ||
+            (property.type && property.type === 'array');
+    }
+
+    private isObject(property: any): boolean {
+        return (((property.bsonType && property.bsonType === 'object') ||
+            (property.type && property.type === 'object')) &&
+            property.properties);
     }
 
     /**
@@ -88,7 +145,7 @@ export class Schema {
         const typeDefinition = this.config.getType(property.msmType);
         Object.assign(property, typeDefinition);
 
-        delete property.msmType;                
+        delete property.msmType;
         return property;
     }
 
@@ -127,6 +184,41 @@ export class Schema {
         };
 
         delete property.msmEnumList;
+        return property;
+    }
+
+    /**
+     * Set the swagger property type based on a bsonType value
+     * 
+     * @param property the property to update
+     * @returns the updated value
+     */
+    private setSwaggerType = (property: any): any => {
+        console.debug("Swagger Processing", property);
+        let theType = property.bsonType;
+        switch (theType) {
+            case "objectId":
+            case "date":
+            case "regex":
+            case "javascript":
+            case "timestamp":
+                theType = "string";
+                break;
+
+            case "double":
+            case "int":
+            case "long":
+            case "decimal":
+            case "minKey":
+            case "maxKey":
+                theType = "number";
+                break;
+
+            case "bool":
+                theType = "boolean";
+        }
+        property.type = theType;
+        delete property.bsonType;
         return property;
     }
 }
