@@ -11,8 +11,8 @@ describe('Config', () => {
         testConfigEnvironmentValue("CONFIG_FOLDER");
     });
 
-    test('test MSM_TYPES', () => {
-        testConfigEnvironmentValue("MSM_TYPES");
+    test('test MSM_ROOT', () => {
+        testConfigEnvironmentValue("MSM_ROOT");
     });
 
     test('test CONNECTION_STRING', () => {
@@ -25,7 +25,7 @@ describe('Config', () => {
 
     test('test LOAD_TEST_DATA', () => {
         testConfigEnvironmentValue("LOAD_TEST_DATA");
-        expect(config.shouldLoadTestData).toBe(false);
+        expect(config.shouldLoadTestData()).toBe(false);
     });
     
     test('test shouldLoadTestData', () => {

@@ -14,12 +14,16 @@ describe('Config', () => {
         expect(config.shouldLoadTestData()).toBe(false);
     });
 
+    test('test BUILT_AT', () => {
+        testConfigDefaultValue("BUILT_AT","LOCAL");
+    });
+
     test('test CONFIG_FOLDER', () => {
         testConfigDefaultValue("CONFIG_FOLDER","/opt/mongoSchemaManager/configurations");
     });
 
-    test('test MSM_TYPES', () => {
-        testConfigDefaultValue("MSM_TYPES","/opt/mongoSchemaManager/msmTypes");
+    test('test MSM_ROOT', () => {
+        testConfigDefaultValue("MSM_ROOT","/opt/mongoSchemaManager");
     });
 
     test('test CONNECTION_STRING', () => {

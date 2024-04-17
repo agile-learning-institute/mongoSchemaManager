@@ -13,8 +13,8 @@ describe('Config', () => {
         config = new Config();
     });
 
-    test('test MSM_TYPES', () => {
-        testConfigFileValue("MSM_TYPES");
+    test('test MSM_ROOT', () => {
+        testConfigFileValue("MSM_ROOT");
     });
 
     test('test CONNECTION_STRING', () => {

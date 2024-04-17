@@ -101,7 +101,7 @@ describe('Config', () => {
     test('test executeAggregations', async () => {
         const document = { "firstName": "Foo", "lastName": "Bar" };
         const expectedOutput = { "name": "Foo Bar" };
-        const aggregation1 = [{$addFields:{name:{$concat:["$firstName","","$lastName"]}}},{$merge:{into:collectionName,on:"_id",whenMatched:"replace",whenNotMatched:"discard"}}];
+        const aggregation1 = [{$addFields:{name:{$concat:["$firstName"," ","$lastName"]}}},{$merge:{into:collectionName,on:"_id",whenMatched:"replace",whenNotMatched:"discard"}}];
         const aggregation2 = [{$unset:["firstName","lastName"]},{$merge:{into:collectionName,on:"_id",whenMatched:"replace",whenNotMatched:"discard"}}];
         const aggregations = [aggregation1,aggregation2];
 

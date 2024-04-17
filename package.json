@@ -6,7 +6,7 @@
     "test": "jest",
     "build": "tsc",
     "prestart": "npm run composeDown && npm run build && npm run composeUpDb",
-    "start": "cross-env CONFIG_FOLDER=./test/resources MSM_TYPES=./src/msmTypes node ./dist/CollectionProcessor.js",
+    "start": "cross-env CONFIG_FOLDER=./test/resources MSM_ROOT=./src node ./dist/CollectionProcessor.js",
     "precontainer": "npm run composeDown && npm run containerize",
     "container": "npm run composeUpTest && docker-compose logs -f 'msm'",
     "containerize": "docker build --tag ghcr.io/agile-learning-institute/msm:latest .",

@@ -27,6 +27,8 @@ export class Config {
     private db?: Db;
     private configFolder: string = "";
     private msmVersionCollection = "msmCurrentVersions";
+    private msmEnumeratorsCollection = "msmEnumerations";
+    private msmRootFolder: string;
     private msmTypesFolder: string;
     private loadTestData: boolean;
     private enumerators: any;
@@ -35,8 +37,10 @@ export class Config {
      * Constructor gets configuration values, loads the enumerators, and logs completion
      */
     constructor() {
+        this.getConfigValue("BUILT_AT", "LOCAL", false);
         this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/configurations", false);
-        this.msmTypesFolder = this.getConfigValue("MSM_TYPES", "/opt/mongoSchemaManager/msmTypes", false);
+        this.msmRootFolder = this.getConfigValue("MSM_ROOT", "/opt/mongoSchemaManager", false);
+        this.msmTypesFolder = join(this.msmRootFolder, "msmTypes");
         this.connectionString = this.getConfigValue("CONNECTION_STRING", "mongodb://root:example@localhost:27017", true);
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
         this.loadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
@@ -333,6 +337,18 @@ export class Config {
     }
 
     /**
+     * Load the Enumerators Collection
+     * 
+     */
+    public async loadEnumerators() {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        
+        await this.bulkLoad(this.msmEnumeratorsCollection, this.enumerators);
+    }
+
+    /**
      * Disconnect from the database
      */
     public async disconnect(): Promise<void> {
@@ -361,12 +377,12 @@ export class Config {
         }
     }
 
-    /**
-     * Get the full enumerators list
-     */
-    public getEnumerators(): any {
-        return this.enumerators;
-    }
+    // /**
+    //  * Get the full enumerators list
+    //  */
+    // public getEnumerators(): any {
+    //     return this.enumerators;
+    // }
 
     /**
      * Get the collection configuration files from the collections folder
@@ -492,7 +508,7 @@ export class Config {
         } else {
             const filePath = join(this.configFolder, name);
             if (existsSync(filePath)) {
-                value = readFileSync(filePath, 'utf-8');
+                value = readFileSync(filePath, 'utf-8').trim();
                 from = 'file';
             }
         }

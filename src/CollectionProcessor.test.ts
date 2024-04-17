@@ -9,6 +9,7 @@ jest.mock('./config/Config', () => {
       connect: jest.fn().mockResolvedValue(undefined),
       disconnect: jest.fn().mockResolvedValue(undefined),
       setVersion: jest.fn().mockReturnValue(undefined),
+      loadEnumerators: jest.fn().mockReturnValue(undefined),
       getEnumerators: jest.fn().mockReturnValue([]),
       getCollectionFiles: jest.fn().mockReturnValue(['collection1.json', 'collection2.json']),
       getCollectionConfig: jest.fn().mockImplementation((fileName) => ({
@@ -43,12 +44,11 @@ describe('CollectionProcessor', () => {
 
     expect(config.connect).toHaveBeenCalledTimes(1);
     expect(config.getCollectionFiles).toHaveBeenCalledTimes(1);
-    expect(config.getCollectionConfig).toHaveBeenCalledTimes(2); // Assuming two files returned by getCollectionFiles
+    expect(config.getCollectionConfig).toHaveBeenCalledTimes(2); 
     expect(config.disconnect).toHaveBeenCalledTimes(1);
-    expect(config.getEnumerators).toHaveBeenCalledTimes(1);
+    expect(config.loadEnumerators).toHaveBeenCalledTimes(1);
 
     expect(Collection).toHaveBeenCalledTimes(2);
   });
 
-  // Add more tests here to cover different scenarios, such as error handling
 });
