@@ -19,8 +19,9 @@ jest.mock('../../src/config/Config', () => {
             executeAggregations: jest.fn(),
             addIndexes: jest.fn(),
             applySchemaValidation: jest.fn(),
-            shouldLoadTestData: jest.fn().mockReturnValue(true), 
+            shouldLoadTestData: jest.fn().mockReturnValue(true),
             bulkLoad: jest.fn(),
+            saveSwagger: jest.fn(),
             setVersion: jest.fn(),
         }))
     };
@@ -29,6 +30,7 @@ jest.mock('../../src/config/Config', () => {
 jest.mock('../../src/models/Schema', () => {
     return {
         Schema: jest.fn().mockImplementation(() => ({
+            getSwagger: jest.fn(),
             getSchema: jest.fn().mockReturnValue({
                 "bsonType": "object",
                 "properties": {
@@ -43,16 +45,16 @@ jest.mock('../../src/models/Schema', () => {
 });
 
 describe('Version', () => {
-    let config: Config;
+    let config: jest.Mocked<Config>;
     const expectedVersion = new VersionNumber("1.0.0.0");
-  
+
     beforeEach(() => {
-      jest.clearAllMocks();
-      config = new Config();
+        jest.clearAllMocks();
+        config = new Config() as jest.Mocked<Config>;
     });
-  
+
     test('test constructor simple', () => {
-        const versionData = {"version": "1.0.0.0"};
+        const versionData = { "version": "1.0.0.0" };
         const theVersion = new Version(config, "people", versionData);
 
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
@@ -129,5 +131,16 @@ describe('Version', () => {
         expect(theVersion.getThis().aggregations.length).toBe(2);
         expect(theVersion.getThis().aggregations[0][0].$match).toBe("match1");
         expect(theVersion.getThis().aggregations[1][0].$match).toBe("match2");
+    });
+
+    test('process should call saveSwagger', async () => {
+        const versionData = { "version": "1.0.0.0" };
+        const theVersion = new Version(config, "people", versionData);
+        await theVersion.apply()
+
+        expect(config.clearSchemaValidation).toHaveBeenCalledTimes(1);
+        expect(config.applySchemaValidation).toHaveBeenCalledTimes(1);
+        expect(config.setVersion).toHaveBeenCalledTimes(1);
+        expect(config.saveSwagger).toHaveBeenCalledTimes(1);
     });
 });

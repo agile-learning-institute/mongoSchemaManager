@@ -1,9 +1,10 @@
 import { VersionNumber } from '../models/VersionNumber';
 import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
-import { readdirSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, readdirSync, existsSync, copyFileSync, readFileSync } from "fs";
 import { join } from 'path';
 import { EJSON } from 'bson';
+import * as yaml from 'js-yaml';
 
 /**
  * A config item, used to track where configuration values were found
@@ -338,7 +339,6 @@ export class Config {
 
     /**
      * Load the Enumerators Collection
-     * 
      */
     public async loadEnumerators() {
         if (!this.db) {
@@ -346,6 +346,22 @@ export class Config {
         }
         
         await this.bulkLoad(this.msmEnumeratorsCollection, this.enumerators);
+    }
+
+    /**
+     * Configure the swagger viewer app
+     * - Copy this.msmRootFolder + /app to this.getOpenApiFolder
+     * - Write all documents from msmVersions folder to versions.json
+     */
+    public async configureApp() {
+        const appFile = join(this.msmRootFolder, "app", "index.html");
+        const targetFile = join(this.getOpenApiFolder(), "index.html");
+        copyFileSync(appFile, targetFile);
+        
+        const versionsFile = join(this.getOpenApiFolder(), "versions.json");
+        let collection = await this.getCollection(this.msmVersionCollection);
+        let versions = await collection.find().toArray();
+        writeFileSync(versionsFile, JSON.stringify(versions), 'utf8');
     }
 
     /**
@@ -376,13 +392,6 @@ export class Config {
             throw new Error("Enumerator does not exist:" + name);
         }
     }
-
-    // /**
-    //  * Get the full enumerators list
-    //  */
-    // public getEnumerators(): any {
-    //     return this.enumerators;
-    // }
 
     /**
      * Get the collection configuration files from the collections folder
@@ -442,6 +451,18 @@ export class Config {
     }
 
     /**
+     * Save swagger
+     * 
+     * @param collection 
+     * @param version 
+     * @returns a schema object (NOT pre-processed)
+     */
+    public saveSwagger(collection: string, version: VersionNumber, swagger: any) {
+        const swaggerFilename = join(this.getOpenApiFolder(), collection + "-" + version.getVersionString() + ".openapi.yaml");
+        writeFileSync(swaggerFilename, yaml.dump(swagger), 'utf8');
+    }
+
+    /**
      * Read the test data file specified
      * 
      * @param filename 
@@ -459,6 +480,15 @@ export class Config {
      */
     public getConfigFolder(): string {
         return this.configFolder;
+    }
+
+    /**
+     * Simple Getter for openApi folder
+     * 
+     * @returns OpenApi folder name
+     */
+    public getOpenApiFolder(): string {
+        return join(this.configFolder, "openApi");
     }
 
     /**
