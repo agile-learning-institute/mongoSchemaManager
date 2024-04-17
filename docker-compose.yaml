@@ -10,9 +10,12 @@ services:
       - "27017:27017"
     healthcheck:
       test: ["CMD", "mongosh", "-u", "root", "-p", "example", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
+      interval: 2s
+      timeout: 2s
+      retries: 15
+    profiles:
+      - msmtest
+      - testing
 
   msm:
     depends_on:
@@ -22,4 +25,5 @@ services:
     - ./test/resources:/opt/mongoSchemaManager/configurations
     environment:
       CONNECTION_STRING: mongodb://root:example@mongodb-server:27017
+      LOAD_TEST_DATA: "true"
     image: ghcr.io/agile-learning-institute/msm:latest

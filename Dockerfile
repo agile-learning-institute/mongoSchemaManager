@@ -13,7 +13,7 @@ COPY src/msmTypes dist/msmTypes
 
 # Record build time
 RUN DATE=$(date "+%Y-%m-%d:%H:%M:%S") && \
-    echo $DATE > dist/VERSION
+    echo $DATE > dist/BUILT_AT
 
 # Final Stage
 FROM node:16 AS run
@@ -25,12 +25,12 @@ FROM node:16 AS run
 # ENV DB_NAME=test
 # ENV LOAD_TEST_DATA=false
 
-# Set the working directory
-WORKDIR /opt/mongoSchemaManager
-
 # Copy built assets from build stage 
 COPY --from=build /app/dist /opt/mongoSchemaManager
 COPY --from=build /app/node_modules /opt/mongoSchemaManager/node_modules
+
+# Set the working directory
+WORKDIR /opt/mongoSchemaManager
 
 # Run the processor
 ENTRYPOINT ["node", "CollectionProcessor.js"]
