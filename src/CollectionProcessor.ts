@@ -32,7 +32,7 @@ export class CollectionProcessor {
       process.exit(1);
     } finally {
       await this.config.disconnect();
-      console.log("Processing completed.");
+      console.log("Processing completed successfully!");
     }
   }
 }
