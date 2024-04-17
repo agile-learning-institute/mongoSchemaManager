@@ -1,17 +1,20 @@
 {
   "name": "msm",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "dist/CollectionProcessor.js",
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "prepackage": "npm run build",
-    "package": "pkg .",
-    "prestart": "npm run build",
-    "start": "cross-env CONFIG_FOLDER=./test/resources MSM_TYPES=./src/msmTypes node ./dist/CollectionProcessor.js",
+    "prestart": "npm run composeDown && npm run build && npm run composeUpDb",
+    "start": "cross-env CONFIG_FOLDER=./test/resources MSM_ROOT=./src node ./dist/CollectionProcessor.js",
+    "precontainer": "npm run composeDown && npm run containerize",
+    "container": "npm run composeUpTest && docker-compose logs -f 'msm'",
     "containerize": "docker build --tag ghcr.io/agile-learning-institute/msm:latest .",
-    "precontainer": "npm run containerize && docker compose down",
-    "container": "docker compose up --detach"
+    "composeDown": "docker compose --profile mongodb down && docker compose --profile testing down",
+    "composeUpDb": "docker compose --profile mongodb up --detach",
+    "composeUpTest": "docker compose --profile testing up --detach",
+    "prepackage": "npm run build",
+    "package": "pkg ."
   },
   "bin": "dist/CollectionProcessor.js",
   "pkg": {

@@ -17,10 +17,12 @@ describe('Config', () => {
         await config.connect();
         db = config.getDatabase();
         collection = await config.getCollection(collectionName);
+        await config.dropCollection("msmCurrentVersions");
     });
 
     afterEach(async () => {
         await config.dropCollection(collectionName);
+        await config.dropCollection("msmCurrentVersions");
         await config.disconnect()
     });
 
@@ -34,56 +36,51 @@ describe('Config', () => {
     });
 
     test('test set/getVersion', async () => {
-        let theVersion = await config.getVersion(collectionName);
+        // Make sure we start with an empty collection
+        let result = await db.collection("msmCurrentVersions").find().toArray();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(0);
+
+        // Get default when not found
+        let theVersion = await config.getVersion("sample");
         expect(theVersion).toBe("0.0.0.0");
 
-        await config.setVersion(collectionName, "1.2.3.4");
-        theVersion = await config.getVersion(collectionName);
+        // Insert Version
+        await config.setVersion("sample", "1.2.3.4");
+        theVersion = await config.getVersion("sample");
         expect(theVersion).toBe("1.2.3.4");
 
-        await config.setVersion(collectionName, "2.2.2.2");
-        theVersion = await config.getVersion(collectionName);
-        expect(theVersion).toBe("2.2.2.2");
+        // Update Version
+        await config.setVersion("sample", "4.3.2.1");
+        theVersion = await config.getVersion("sample");
+        expect(theVersion).toBe("4.3.2.1");
+
+        // Add another collection Version
+        await config.setVersion("test", "1.0.0.0");
+
+        // Test all results
+        // let expected = [{"collectionName":"sample", "currentVersion":"4.3.2.1"},{"collectionName":"test", "currentVersion":"1.0.0.0"}];
+        result = await db.collection("msmCurrentVersions").find().toArray();
+        expect(result[0].collectionName).toBe("sample");
+        expect(result[0].currentVersion).toBe("4.3.2.1");
+        expect(result[1].collectionName).toBe("test");
+        expect(result[1].currentVersion).toBe("1.0.0.0");
     });
 
     test('test apply/remove schema validation', async () => {
-        const schema = {
-            bsonType: "object",
-            properties: {
-                name: {
-                    description: "Name Description",
-                    bsonType: "string",
-                }
-            }
-        };
+        const schema = {bsonType:"object",properties:{name:{description:"Name Description",bsonType:"string"}}};
 
-        // Apply schema validation
         config.applySchemaValidation(collectionName, schema);
-
-        // Get the applied schema
         let appliedSchema = await config.getSchemaValidation(collectionName);
         expect(appliedSchema).toStrictEqual({ "$jsonSchema": schema });
 
-        // Clear schema validation
         await config.clearSchemaValidation(collectionName);
-
-        // Verify schema validation is cleared
         appliedSchema = await config.getSchemaValidation(collectionName);
         expect(appliedSchema).toStrictEqual({});
     });
 
     test('test add/drop indexes', async () => {
-        let indexes: {}[] = [
-            {
-                "name": "nameIndex",
-                "key": { "userName": 1 },
-                "options": { "unique": true }
-            }, {
-                "name": "typeIndex",
-                "key": { "type": 1 },
-                "options": { "unique": false }
-            }
-        ];
+        let indexes: {}[] = [{"name":"nameIndex","key":{"userName":1},"options":{"unique":true}},{"name":"typeIndex","key":{"type":1},"options":{"unique":false}}];
         let names: string[] = ["typeIndex"];
 
         await config.addIndexes(collectionName, indexes);
@@ -104,41 +101,9 @@ describe('Config', () => {
     test('test executeAggregations', async () => {
         const document = { "firstName": "Foo", "lastName": "Bar" };
         const expectedOutput = { "name": "Foo Bar" };
-        const aggregation1 = [
-            {
-                $addFields: {
-                    name: {
-                        $concat: ["$firstName", " ", "$lastName"]
-                    }
-                }
-            },
-            {
-                $merge: {
-                    into: collectionName,
-                    on: "_id",
-                    whenMatched: "replace",
-                    whenNotMatched: "discard"
-                }
-            }
-        ];
-
-        const aggregation2 = [
-            {
-                $unset: ["firstName", "lastName"]
-            },
-            {
-                $merge: {
-                    into: collectionName,
-                    on: "_id",
-                    whenMatched: "replace",
-                    whenNotMatched: "discard"
-                }
-            }
-        ];
-        const aggregations = [
-            aggregation1,
-            aggregation2
-        ];
+        const aggregation1 = [{$addFields:{name:{$concat:["$firstName"," ","$lastName"]}}},{$merge:{into:collectionName,on:"_id",whenMatched:"replace",whenNotMatched:"discard"}}];
+        const aggregation2 = [{$unset:["firstName","lastName"]},{$merge:{into:collectionName,on:"_id",whenMatched:"replace",whenNotMatched:"discard"}}];
+        const aggregations = [aggregation1,aggregation2];
 
         await db.collection(collectionName).insertOne(document);
         await config.executeAggregations(collectionName, aggregations);

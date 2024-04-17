@@ -28,7 +28,7 @@ Enumerations are A gold standard with regard to data quality. There are however 
 - the UI needs to know them
 - they can't be reused by different collections
 
-msm uses the ``enumerators/enumerators.json`` file, which provides descriptions in addition to the enumerated values. This data is used during schema pre-processing to support re-use. The msm process will create an enumerators collection that contains this data so that it can be served to UI consumers. Here is a sample enumerators file with 3 versions.
+msm uses the ``enumerators/enumerators.json`` file, which provides descriptions in addition to the enumerated values. This data is used during schema pre-processing to support re-use. The msm process will create an ``msmEnumerations`` collection that contains this data so that it can be served to UI consumers. Here is a sample enumerators file with 3 versions.
 ```json
 [
     {
@@ -344,11 +344,12 @@ Test data is pre-processed by the mongo [EJSON](https://www.mongodb.com/docs/man
 "date": {"$date": "2/27/2024 18:17:58"}
 ```
 
-## The Collection Version Document
-Each collection will have a collection version document, so you must account for these properties in your schema.
+## The msmCurrentVersions collection
+Msm will create a msmCurrentVersions collection that will contain current version documents.
 ```json
-{
-    "name": "VERSION",
-    "version": "1.2.3.4"
-}
+[
+    {"collectionName": "sample", "currentVersion": "1.2.3.4"}.
+    {"collectionName": "test", "currentVersion": "1.0.0.0"}.
+    {"collectionName": "profile", "currentVersion": "1.0.2.3"}
+]
 ```

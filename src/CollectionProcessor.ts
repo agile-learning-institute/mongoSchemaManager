@@ -24,7 +24,7 @@ export class CollectionProcessor {
       }
 
       // Write enumerators collection
-      await this.config.bulkLoad("enumerators", this.config.getEnumerators());
+      await this.config.loadEnumerators();
 
     } catch (e) {
       console.error(e);
@@ -32,7 +32,7 @@ export class CollectionProcessor {
       process.exit(1);
     } finally {
       await this.config.disconnect();
-      console.log("Processing completed.");
+      console.log("Processing completed successfully!");
     }
   }
 }

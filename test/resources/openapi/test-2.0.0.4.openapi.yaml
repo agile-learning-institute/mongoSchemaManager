@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: REPLACE
-  version: REPLACE
+  title: mongoSchemaManager.Collection
+  version: mongoSchemaManager.VersionNumber
 paths:
-  "/collection/":
+  /collection/:
     get:
       responses:
         '200':
@@ -11,10 +11,9 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/collection"
+                $ref: '#/components/schemas/collection'          
 components:
   schemas:
     collection:
       description: Generated Schema Goes Here
-      type: object
       type: object

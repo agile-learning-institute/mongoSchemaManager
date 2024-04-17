@@ -26,6 +26,9 @@ export class Config {
     private client?: MongoClient;
     private db?: Db;
     private configFolder: string = "";
+    private msmVersionCollection = "msmCurrentVersions";
+    private msmEnumeratorsCollection = "msmEnumerations";
+    private msmRootFolder: string;
     private msmTypesFolder: string;
     private loadTestData: boolean;
     private enumerators: any;
@@ -34,8 +37,10 @@ export class Config {
      * Constructor gets configuration values, loads the enumerators, and logs completion
      */
     constructor() {
+        this.getConfigValue("BUILT_AT", "LOCAL", false);
         this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/configurations", false);
-        this.msmTypesFolder = this.getConfigValue("MSM_TYPES", "/opt/mongoSchemaManager/msmTypes", false);
+        this.msmRootFolder = this.getConfigValue("MSM_ROOT", "/opt/mongoSchemaManager", false);
+        this.msmTypesFolder = join(this.msmRootFolder, "msmTypes");
         this.connectionString = this.getConfigValue("CONNECTION_STRING", "mongodb://root:example@localhost:27017", true);
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
         this.loadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
@@ -110,16 +115,15 @@ export class Config {
             throw new Error("config.setVersion - Database not connected");
         }
 
-        const versionDocument = { name: "VERSION", version: versionString };
-        const filter = { name: "VERSION" };
-        const update = { $set: { version: versionString } };
-        const options = { upsert: true };
+        const filter = { "collectionName": collectionName };
+        const update = { "$set": { "currentVersion": versionString } };
+        const options = { "upsert": true };
         try {
-            const collection = await this.getCollection(collectionName);
+            const collection = await this.getCollection(this.msmVersionCollection);
             await collection.updateOne(filter, update, options);
-            console.info("Version set or updated in collection", collectionName, "to", versionString);
+            console.info("Version set or updated for collection", collectionName, "to", versionString);
         } catch (error) {
-            console.error("Version set failed", versionDocument, "Error:", error);
+            console.error("Version set failed", collectionName, versionString, "Error:", error);
             throw error;
         }
     }
@@ -134,9 +138,9 @@ export class Config {
         if (!this.db) {
             throw new Error("config.getVersion - Database not connected");
         }
-        const collection = await this.getCollection(collectionName);
-        const versionDocument = await collection.findOne({ name: "VERSION" });
-        return versionDocument ? versionDocument.version : "0.0.0.0";
+        const collection = await this.getCollection(this.msmVersionCollection);
+        const versionDocument = await collection.findOne({ collectionName: collectionName });
+        return versionDocument ? versionDocument.currentVersion : "0.0.0.0";
     }
 
     /**
@@ -333,6 +337,18 @@ export class Config {
     }
 
     /**
+     * Load the Enumerators Collection
+     * 
+     */
+    public async loadEnumerators() {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+        
+        await this.bulkLoad(this.msmEnumeratorsCollection, this.enumerators);
+    }
+
+    /**
      * Disconnect from the database
      */
     public async disconnect(): Promise<void> {
@@ -361,12 +377,12 @@ export class Config {
         }
     }
 
-    /**
-     * Get the full enumerators list
-     */
-    public getEnumerators(): any {
-        return this.enumerators;
-    }
+    // /**
+    //  * Get the full enumerators list
+    //  */
+    // public getEnumerators(): any {
+    //     return this.enumerators;
+    // }
 
     /**
      * Get the collection configuration files from the collections folder
@@ -464,6 +480,15 @@ export class Config {
     }
 
     /**
+     * Simple Getter for configItems
+     * 
+     * @returns configItems array
+     */
+    public getConfigItems(): ConfigItem[] {
+        return this.configItems;
+    }
+
+    /**
      * Get the named configuration value, from the environment if available, 
      * then from a file if present, and finally use the provided default if not 
      * found. This will add a ConfigItem that describes where this data was found
@@ -483,7 +508,7 @@ export class Config {
         } else {
             const filePath = join(this.configFolder, name);
             if (existsSync(filePath)) {
-                value = readFileSync(filePath, 'utf-8');
+                value = readFileSync(filePath, 'utf-8').trim();
                 from = 'file';
             }
         }
