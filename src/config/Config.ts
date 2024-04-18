@@ -104,6 +104,14 @@ export class Config {
     /** 
      * Simple Getters
      */
+    public file(): ConfigFile {
+        return this.fileIo;
+    }
+
+    public mongo(): ConfigMongo {
+        return this.mongoIo;
+    }
+
     public shouldLoadTestData(): boolean {
         return this.loadTestData;
     }
