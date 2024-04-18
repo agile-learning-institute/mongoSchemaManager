@@ -42,9 +42,6 @@ export class Schema {
         this.swagger.info = info;
         this.swagger.paths = path;
         this.swagger.components = components;
-
-        console.info("Schema For Collection:" + collection, "Version:" + version.getVersionString(), "Schema:" + JSON.stringify(this.schema));
-        console.info("Swagger For Collection:" + collection, "Version:" + version.getVersionString(), "Swagger:" + JSON.stringify(this.swagger));
     }
 
     /**
@@ -81,9 +78,7 @@ export class Schema {
             let property = properties[key];
             
             // Check if the current property itself has the target directive type
-            console.debug("Processing Property", property, type);
             if (property.hasOwnProperty(type)) {
-                console.debug("HasOwn Processing");
                 properties[key] = process(property);
             }
 
@@ -194,7 +189,6 @@ export class Schema {
      * @returns the updated value
      */
     private setSwaggerType = (property: any): any => {
-        console.debug("Swagger Processing", property);
         let theType = property.bsonType;
         switch (theType) {
             case "objectId":
