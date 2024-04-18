@@ -1,7 +1,7 @@
 import { VersionNumber } from '../models/VersionNumber';
 import { Index } from '../models/Index';
 import { MongoClient, Db } from 'mongodb';
-import { writeFileSync, readdirSync, existsSync, copyFileSync, readFileSync } from "fs";
+import { writeFileSync, readdirSync, mkdirSync, existsSync, copyFileSync, readFileSync, statSync } from "fs";
 import { join } from 'path';
 import { EJSON } from 'bson';
 import * as yaml from 'js-yaml';
@@ -26,13 +26,12 @@ export class Config {
     private dbName: string;
     private client?: MongoClient;
     private db?: Db;
-    private configFolder: string = "";
+    private configFolder: string = "";  // where configuration values are found
+    private msmRootFolder: string;      // Where system resources (/apps & /msmTypes) are found 
+    private loadTestData: boolean;      // Load test data flag
+    private enumerators: any;           // System enumerators
     private msmVersionCollection = "msmCurrentVersions";
     private msmEnumeratorsCollection = "msmEnumerations";
-    private msmRootFolder: string;
-    private msmTypesFolder: string;
-    private loadTestData: boolean;
-    private enumerators: any;
 
     /**
      * Constructor gets configuration values, loads the enumerators, and logs completion
@@ -41,28 +40,25 @@ export class Config {
         this.getConfigValue("BUILT_AT", "LOCAL", false);
         this.configFolder = this.getConfigValue("CONFIG_FOLDER", "/opt/mongoSchemaManager/configurations", false);
         this.msmRootFolder = this.getConfigValue("MSM_ROOT", "/opt/mongoSchemaManager", false);
-        this.msmTypesFolder = join(this.msmRootFolder, "msmTypes");
         this.connectionString = this.getConfigValue("CONNECTION_STRING", "mongodb://root:example@localhost:27017", true);
         this.dbName = this.getConfigValue("DB_NAME", "test", false);
         this.loadTestData = this.getConfigValue("LOAD_TEST_DATA", "false", false) === "true";
 
-        let enumeratorsFileName = join(this.configFolder, "enumerators", "enumerators.json");
-        if (existsSync(enumeratorsFileName)) {
-            this.enumerators = JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'));
-        } else {
-            this.enumerators = { "enumerators": {} };
-        }
-
         console.info("Configuration Initilized:", JSON.stringify(this.configItems));
     }
 
-    /**
+    /********************************************************************************
+     ***** MongoDB IO handlers                                                  *****
+     ********************************************************************************/
+
+     /**
      * Connect to the Mongo Database
      */
     public async connect(): Promise<void> {
         this.client = new MongoClient(this.connectionString);
         await this.client.connect();
         this.db = this.client.db(this.dbName);
+
         console.info("Database", this.dbName, "Connected");
     }
 
@@ -338,7 +334,7 @@ export class Config {
     }
 
     /**
-     * Load the Enumerators Collection
+     * Load the Enumerators Collection into the MongoDB
      */
     public async loadEnumerators() {
         if (!this.db) {
@@ -346,22 +342,6 @@ export class Config {
         }
         
         await this.bulkLoad(this.msmEnumeratorsCollection, this.enumerators);
-    }
-
-    /**
-     * Configure the swagger viewer app
-     * - Copy this.msmRootFolder + /app to this.getOpenApiFolder
-     * - Write all documents from msmVersions folder to versions.json
-     */
-    public async configureApp() {
-        const appFile = join(this.msmRootFolder, "app", "index.html");
-        const targetFile = join(this.getOpenApiFolder(), "index.html");
-        copyFileSync(appFile, targetFile);
-        
-        const versionsFile = join(this.getOpenApiFolder(), "versions.json");
-        let collection = await this.getCollection(this.msmVersionCollection);
-        let versions = await collection.find().toArray();
-        writeFileSync(versionsFile, JSON.stringify(versions), 'utf8');
     }
 
     /**
@@ -375,147 +355,16 @@ export class Config {
         }
     }
 
-    /**
-     * Get the named enumerators object from the enumerators version specified
-     * 
-     * @param version 
-     * @param name 
-     * @returns enumerators object {"Value":"Description"}
-     */
-    public getEnums(version: number, name: string): any {
-        if (this.enumerators[version].version != version) {
-            throw new Error("Invalid Enumerators File bad version number sequence")
-        }
-        if (this.enumerators[version].enumerators.hasOwnProperty(name)) {
-            return this.enumerators[version].enumerators[name];
-        } else {
-            throw new Error("Enumerator does not exist:" + name);
-        }
-    }
+    /********************************************************************************
+     ***** Filesystem IO handlers                                               *****
+     ********************************************************************************/
 
     /**
-     * Get the collection configuration files from the collections folder
-     * 
-     * @returns array of file names
+     * Initilize file system access, validate config folders exist.
      */
-    public getCollectionFiles(): string[] {
-        const collectionsFolder = join(this.configFolder, "collections");
-        const collectionFiles = readdirSync(collectionsFolder).filter(file => file.endsWith('.json'));
-        if (!Array.isArray(collectionFiles)) {
-            return [];
-        }
-        return collectionFiles;
-    }
-
-    /**
-     * Read the specified collection configuration file 
-     * 
-     * @param fileName 
-     * @returns JSON Collection object
-     */
-    public getCollectionConfig(fileName: string): any {
-        const filePath = join(this.configFolder, "collections", fileName);
-        return JSON.parse(readFileSync(filePath, 'utf-8'));
-    }
-
-    /**
-     * Get a custom type, looking first in the msmTypesFolder and if not
-     * found there look in the <root>/customTypes folder.
-     * 
-     * @param type - the name of the type file (without a json extension)
-     * @returns The parsed JSON object from the type file
-     */
-    public getType(type: string): any {
-        let typeFilename: string;
-        typeFilename = join(this.msmTypesFolder, type + ".json");
-        if (!existsSync(typeFilename)) {
-            typeFilename = join(this.configFolder, "customTypes", type + ".json")
-            if (!existsSync(typeFilename)) {
-                throw new Error("Type Not Found:" + type);
-            }
-        }
-        const typeContent = readFileSync(typeFilename, 'utf-8');
-        return JSON.parse(typeContent);
-    }
-
-    /**
-     * Read the collection schema file specified at the version provided
-     * 
-     * @param collection 
-     * @param version 
-     * @returns a schema object (NOT pre-processed)
-     */
-    public getSchema(collection: string, version: VersionNumber): any {
-        const schemaFileName = join(this.configFolder, "schemas", collection + "-" + version.getShortVersionString() + ".json");
-        return JSON.parse(readFileSync(schemaFileName, 'utf8'));
-    }
-
-    /**
-     * Save swagger
-     * 
-     * @param collection 
-     * @param version 
-     * @returns a schema object (NOT pre-processed)
-     */
-    public saveSwagger(collection: string, version: VersionNumber, swagger: any) {
-        const swaggerFilename = join(this.getOpenApiFolder(), collection + "-" + version.getVersionString() + ".openapi.yaml");
-        writeFileSync(swaggerFilename, yaml.dump(swagger), 'utf8');
-    }
-
-    /**
-     * Read the test data file specified
-     * 
-     * @param filename 
-     * @returns JSON parsed object from the file
-     */
-    public getTestData(filename: string): any {
-        let filePath = join(this.configFolder, "testData", filename + ".json");
-        return JSON.parse(readFileSync(filePath, 'utf8'));
-    }
-
-    /**
-     * Simple Getter for <root> folder
-     * 
-     * @returns ConfigFolder
-     */
-    public getConfigFolder(): string {
-        return this.configFolder;
-    }
-
-    /**
-     * Simple Getter for openApi folder
-     * 
-     * @returns OpenApi folder name
-     */
-    public getOpenApiFolder(): string {
-        return join(this.configFolder, "openApi");
-    }
-
-    /**
-     * Simple Getter for msmTypes
-     * 
-     * @returns msmTypes Folder
-     */
-    public getMsmTypesFolder(): string {
-        return this.msmTypesFolder;
-    }
-
-    /**
-     * simple should-load getter
-     * 
-     * @returns true if test data should be loaded
-     */
-    public shouldLoadTestData(): boolean {
-        return this.loadTestData;
-    }
-
-    /**
-     * Simple Getter for configItems
-     * 
-     * @returns configItems array
-     */
-    public getConfigItems(): ConfigItem[] {
-        return this.configItems;
+    public attachFiles() {
+        this.checkFolders();
+        this.enumerators = this.readEnumeratorsFile();
     }
 
     /**
@@ -545,5 +394,203 @@ export class Config {
 
         this.configItems.push({ name, value, from });
         return value;
+    }
+
+    /**
+    * Check to make sure configuration folders exist, creating folders that are mssing, or throwing
+    * an error if missing folders can not be empty.
+    */
+    private checkFolders() {
+        this.assertFolderExists(this.msmRootFolder, false);
+        this.assertFolderExists(this.getCollectionsFolder(), false);
+        this.assertFolderExists(this.getMsmEnumeratorsFolder(), false);
+        this.assertFolderExists(this.getSchemasFolder(), false);
+
+        this.assertFolderExists(this.getMsmTypesFolder(), true);
+        this.assertFolderExists(this.getOpenApiFolder(), true);
+        this.assertFolderExists(this.getTestDataFolder(), true);
+
+
+        if (!existsSync(this.getMsmEnumeratorsFile())) {
+            throw new Error("Enumerations File does not exist! " + this.getMsmEnumeratorsFile());
+        }
+    }
+
+    private assertFolderExists(folderName: string, createIt: boolean) {
+        if (!(existsSync(folderName) && statSync(folderName).isDirectory())) {
+            if (createIt) {
+                mkdirSync(folderName);
+                console.info(folderName, "Created");
+            } else {
+                throw new Error("Folder does not exist! " + folderName);
+            }
+        }
+    }
+
+    /**
+     * Read the Enumerations
+     * @returns JSON parsed Enumerators
+     */
+    public readEnumeratorsFile(): any {
+        let enumeratorsFileName = this.getMsmEnumeratorsFile();
+        return JSON.parse(readFileSync(enumeratorsFileName, 'utf-8'));
+    }
+    
+    /**
+     * Configure the swagger viewer app
+     * - Copy this.msmRootFolder + /app to this.getOpenApiFolder
+     * - Write all documents from msmVersions folder to versions.json
+     */
+    public async configureApp() {
+        const appFile = join(this.msmRootFolder, "app", "index.html");
+        const targetFile = join(this.getOpenApiFolder(), "index.html");
+        copyFileSync(appFile, targetFile);
+        
+        const versionsFile = join(this.getOpenApiFolder(), "versions.json");
+        let collection = await this.getCollection(this.msmVersionCollection);
+        let versions = await collection.find().toArray();
+        writeFileSync(versionsFile, JSON.stringify(versions), 'utf8');
+    }
+
+    /**
+     * Get the collection configuration files from the collections folder
+     * 
+     * @returns array of file names
+     */
+    public getCollectionFiles(): string[] {
+        const collectionsFolder = this.getCollectionsFolder();
+        const collectionFiles = readdirSync(collectionsFolder).filter(file => file.endsWith('.json'));
+        if (!Array.isArray(collectionFiles)) {
+            return [];
+        }
+        return collectionFiles;
+    }
+
+    /**
+     * Read the specified collection configuration file 
+     * 
+     * @param fileName 
+     * @returns JSON Collection object
+     */
+    public getCollectionConfig(fileName: string): any {
+        const filePath = join(this.configFolder, "collections", fileName);
+        return JSON.parse(readFileSync(filePath, 'utf-8'));
+    }
+
+    /**
+     * Get a custom type, looking first in the msmTypesFolder and if not
+     * found there look in the <root>/customTypes folder.
+     * 
+     * @param type - the name of the type file (without a json extension)
+     * @returns The parsed JSON object from the type file
+     */
+    public getType(type: string): any {
+        let typeFilename: string;
+        typeFilename = join(this.getMsmTypesFolder(), type + ".json");
+        if (!existsSync(typeFilename)) {
+            typeFilename = join(this.configFolder, "customTypes", type + ".json")
+            if (!existsSync(typeFilename)) {
+                throw new Error("Type Not Found:" + type);
+            }
+        }
+        const typeContent = readFileSync(typeFilename, 'utf-8');
+        return JSON.parse(typeContent);
+    }
+
+    /**
+     * Read the collection schema file specified at the version provided
+     * 
+     * @param collection 
+     * @param version 
+     * @returns a schema object (NOT pre-processed)
+     */
+    public getSchema(collection: string, version: VersionNumber): any {
+        const schemaFileName = join(this.getSchemasFolder(), collection + "-" + version.getShortVersionString() + ".json");
+        return JSON.parse(readFileSync(schemaFileName, 'utf8'));
+    }
+
+    /**
+     * Save swagger
+     * 
+     * @param collection 
+     * @param version 
+     * @returns a schema object (NOT pre-processed)
+     */
+    public saveSwagger(collection: string, version: VersionNumber, swagger: any) {
+        const swaggerFilename = join(this.getOpenApiFolder(), collection + "-" + version.getVersionString() + ".openapi.yaml");
+        writeFileSync(swaggerFilename, yaml.dump(swagger), 'utf8');
+    }
+
+    /**
+     * Read the test data file specified
+     * 
+     * @param filename 
+     * @returns JSON parsed object from the file
+     */
+    public getTestData(filename: string): any {
+        let filePath = join(this.getTestDataFolder(), filename + ".json");
+        return JSON.parse(readFileSync(filePath, 'utf8'));
+    }
+    
+    /********************************************************************************
+     ***** Normal Object getters                                                *****
+     ********************************************************************************/
+
+    /**
+     * Get the named enumerators object from the enumerators version specified
+     * 
+     * @param version 
+     * @param name 
+     * @returns enumerators object {"Value":"Description"}
+     */
+    public getEnums(version: number, name: string): any {
+        if (this.enumerators[version].version != version) {
+            throw new Error("Invalid Enumerators File bad version number sequence")
+        }
+        if (this.enumerators[version].enumerators.hasOwnProperty(name)) {
+            return this.enumerators[version].enumerators[name];
+        } else {
+            throw new Error("Enumerator does not exist:" + name);
+        }
+    }
+
+    public shouldLoadTestData(): boolean {
+        return this.loadTestData;
+    }
+
+    public getConfigItems(): ConfigItem[] {
+        return this.configItems;
+    }
+
+    public getConfigFolder(): string {
+        return this.configFolder;
+    }
+
+    public getCollectionsFolder() {
+        return join(this.configFolder, "collections");
+    }    
+
+    public getMsmTypesFolder(): string {
+        return join(this.msmRootFolder, "msmTypes");
+    }
+
+    public getMsmEnumeratorsFolder(): string {
+        return join(this.configFolder, "enumerators");
+    }
+
+    public getMsmEnumeratorsFile(): string {
+        return join(this.getMsmEnumeratorsFolder(), "enumerators.json");
+    }
+
+    public getOpenApiFolder(): string {
+        return join(this.configFolder, "openApi");
+    }    
+
+    public getSchemasFolder(): string {
+        return join(this.configFolder, "schemas")
+    }
+
+    public getTestDataFolder(): string {
+        return join(this.configFolder, "testData");
     }
 }

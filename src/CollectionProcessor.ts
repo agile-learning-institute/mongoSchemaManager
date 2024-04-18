@@ -13,6 +13,7 @@ export class CollectionProcessor {
 
     try {
       await this.config.connect();
+      this.config.attachFiles();
       const collectionFiles = this.config.getCollectionFiles();
 
       // Process all collection files

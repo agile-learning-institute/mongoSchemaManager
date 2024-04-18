@@ -17,6 +17,7 @@ describe('Config', () => {
         process.env.CONFIG_FOLDER = "./test/resources";
         process.env.MSM_ROOT = "./src";
         config = new Config();
+        config.attachFiles();
         process.env.MSM_ROOT = "";
         process.env.CONFIG_FOLDER = "";
     });
