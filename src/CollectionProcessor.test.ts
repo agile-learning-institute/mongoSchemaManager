@@ -5,6 +5,7 @@ import { CollectionProcessor } from './CollectionProcessor';
 jest.mock('./config/Config', () => {
   return {
     Config: jest.fn().mockImplementation(() => ({
+      attachFiles: jest.fn(),
       bulkLoad: jest.fn(),
       configureApp: jest.fn(),
       connect: jest.fn(),
