@@ -6,13 +6,9 @@ jest.mock('./config/Config', () => {
   return {
     Config: jest.fn().mockImplementation(() => ({
       attachFiles: jest.fn(),
-      bulkLoad: jest.fn(),
       configureApp: jest.fn(),
       connect: jest.fn(),
       disconnect: jest.fn(),
-      setVersion: jest.fn(),
-      loadEnumerators: jest.fn(),
-      getEnumerators: jest.fn().mockReturnValue([]),
       getCollectionFiles: jest.fn().mockReturnValue(['collection1.json', 'collection2.json']),
       getCollectionConfig: jest.fn().mockImplementation((fileName) => ({
         collectionName: fileName.split('.')[0], // Mocked implementation example
