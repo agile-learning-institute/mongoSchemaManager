@@ -28,8 +28,8 @@ export class Config {
     private msmRootFolder: string;          // Where system resources (/apps & /msmTypes) are found 
     private loadTestData: boolean;          // Load test data flag
     private enumerators: any;               // System enumerators
-    private fileIo: ConfigFile              // File IO Handlers
-    private mongoIo: ConfigMongo            // MongoDB IO Handlers
+    public fileIo: ConfigFile              // File IO Handlers
+    public mongoIo: ConfigMongo            // MongoDB IO Handlers
 
     /**
      * Constructor gets configuration values, loads the enumerators, and logs completion
@@ -104,14 +104,6 @@ export class Config {
     /** 
      * Simple Getters
      */
-    public file(): ConfigFile {
-        return this.fileIo;
-    }
-
-    public mongo(): ConfigMongo {
-        return this.mongoIo;
-    }
-
     public shouldLoadTestData(): boolean {
         return this.loadTestData;
     }
@@ -171,12 +163,12 @@ export class Config {
     /**
      * File I-O Facade Functions
      */
-    public async loadEnumerators() {
-        this.mongoIo.bulkLoad("enumerators", this.fileIo.readEnumeratorsFile());
+    public attachFiles() {
+        return this.fileIo.attachFiles()
     }
 
-    public attachFiles() {
-        return this.fileIo.attachFiles();
+    public async loadEnumerators() {
+        this.mongoIo.bulkLoad("enumerators", this.fileIo.readEnumeratorsFile());
     }
 
     public async configureApp() {
@@ -211,11 +203,11 @@ export class Config {
      * Mongo I-O Facade Functions
      */
     public async connect(): Promise<void> {
-        return this.mongoIo.connect();
+        return await this.mongoIo.connect();
     }
 
     public async disconnect(): Promise<void> {
-        return this.mongoIo.disconnect();
+        return await this.mongoIo.disconnect();
     }
 
     public getDatabase(): Db {
@@ -223,54 +215,54 @@ export class Config {
     }
 
     public async getCollection(collectionName: string) {
-        return this.mongoIo.getCollection(collectionName);
+        return await this.mongoIo.getCollection(collectionName);
     }
 
     public async dropCollection(collectionName: string) {
-        return this.mongoIo.dropCollection(collectionName);
+        return await this.mongoIo.dropCollection(collectionName);
     }
 
     public async getVersion(collectionName: string): Promise<string> {
-        return this.mongoIo.getVersion(collectionName);
+        return await this.mongoIo.getVersion(collectionName);
     }
 
     public async getVersionData(): Promise<any> {
-        return this.mongoIo.getVersionData();
+        return await this.mongoIo.getVersionData();
     }
     
     public async setVersion(collectionName: string, versionString: string) {
-        return this.mongoIo.setVersion(collectionName,versionString);
+        return await this.mongoIo.setVersion(collectionName,versionString);
     }
 
     public async applySchemaValidation(collectionName: string, schema: any) {
-        return this.mongoIo.applySchemaValidation(collectionName, schema);
+        return await this.mongoIo.applySchemaValidation(collectionName, schema);
     }
 
     public async getSchemaValidation(collectionName: string): Promise<any> {
-        return this.mongoIo.getSchemaValidation(collectionName);
+        return await this.mongoIo.getSchemaValidation(collectionName);
     }
 
     public async clearSchemaValidation(collectionName: string) {
-        return this.mongoIo.clearSchemaValidation(collectionName);
+        return await this.mongoIo.clearSchemaValidation(collectionName);
     }
 
     public async addIndexes(collectionName: string, indexes: any[]) {
-        return this.mongoIo.addIndexes(collectionName, indexes);
+        return await this.mongoIo.addIndexes(collectionName, indexes);
     }
 
     public async getIndexes(collectionName: string): Promise<Index[]> {
-        return this.mongoIo.getIndexes(collectionName);
+        return await this.mongoIo.getIndexes(collectionName);
     }
 
     public async dropIndexes(collectionName: string, names: string[]) {
-        return this.mongoIo.dropIndexes(collectionName, names);
+        return await this.mongoIo.dropIndexes(collectionName, names);
     }
 
     public async executeAggregations(collectionName: string, aggregations: any[][]) {
-        return this.mongoIo.executeAggregations(collectionName,aggregations);
+        return await this.mongoIo.executeAggregations(collectionName,aggregations);
     }
 
     public async bulkLoad(collectionName: string, data: any[]) {
-        return this.mongoIo.bulkLoad(collectionName, data);
+        return await this.mongoIo.bulkLoad(collectionName, data);
     }
 }
