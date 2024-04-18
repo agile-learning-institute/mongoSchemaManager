@@ -330,7 +330,7 @@ export class Config {
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.insertMany(EJSON.deserialize(data));
-            console.info("Bulk load successful: ", JSON.stringify(result));
+            console.info("Bulk load successfully loaded", result.insertedCount, "documents");
         } catch (error) {
             console.error("Failed to perform bulk load:", error);
             throw error; 
