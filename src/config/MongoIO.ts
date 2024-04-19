@@ -310,7 +310,7 @@ export class MongoIO {
      * @param collectionName 
      * @param data 
      */
-    public async bulkLoad(collectionName: string, data: any[]) {
+    public async bulkLoad(collectionName: string, data: any[]): Promise<void> {
         if (!this.db) {
             throw new Error("Database not connected");
         }

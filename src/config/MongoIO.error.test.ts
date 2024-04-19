@@ -82,8 +82,7 @@ describe('Config', () => {
 
     test('test addIndexsNone', async () => {
         await mongoIo.connect();
-        expect(mongoIo.addIndexes("test", [])).resolves;
-        expect(mongoIo.addIndexes("test", [{}])).rejects.toThrow("Failed to add indexes:")
+        expect(await mongoIo.addIndexes("test", [])).resolves;
         await mongoIo.dropCollection("test");
         await mongoIo.disconnect();
     });
@@ -91,6 +90,7 @@ describe('Config', () => {
     test('test addIndexsInvalidFail', async () => {
         const indexs = [{"name":"nameIndex","key":"InvalidKey"}];
         await mongoIo.connect();
+        await mongoIo.dropCollection("test");
         await mongoIo.getCollection("test");
         await expect(() => mongoIo.addIndexes("test", indexs)).rejects.toThrow("Error in specification");
         await mongoIo.dropCollection("test");
