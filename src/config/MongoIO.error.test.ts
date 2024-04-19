@@ -28,7 +28,15 @@ describe('Config', () => {
     });
 
     test('test getVersion', async () => {
-        await expect(() => mongoIo.getCollection("foo")).rejects.toThrow("Database not connected");
+        await expect(() => mongoIo.getVersion("foo")).rejects.toThrow("Database not connected");
+    });
+
+    test('test getVersionData', async () => {
+        await expect(() => mongoIo.getVersionData()).rejects.toThrow("Database not connected");
+    });
+
+    test('test getVersionData', async () => {
+        await expect(() => mongoIo.getVersionData()).rejects.toThrow("Database not connected");
     });
 
     test('test applySchemaValidation', async () => {
@@ -36,7 +44,7 @@ describe('Config', () => {
     });
 
     test('test getSchemaValidation', async () => {
-        await expect(() => mongoIo.getCollection("foo")).rejects.toThrow("Database not connected");
+        await expect(() => mongoIo.getSchemaValidation("foo")).rejects.toThrow("Database not connected");
     });
 
     test('test clearSchemaValidation', async () => {
@@ -57,5 +65,9 @@ describe('Config', () => {
 
     test('test executeAggregations', async () => {
         await expect(() => mongoIo.executeAggregations("foo", [])).rejects.toThrow("Database not connected");
+    });
+
+    test('test bulkLoad', async () => {
+        await expect(() => mongoIo.bulkLoad("foo", [])).rejects.toThrow("Database not connected");
     });
 });

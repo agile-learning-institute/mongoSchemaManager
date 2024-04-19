@@ -13,9 +13,6 @@ export class VersionNumber {
      * @param versionString 
      */
     constructor(versionString: string) {
-        if (versionString === undefined) {
-            throw new Error("Invalid Version Number is undefined")
-        }
         const numbers: number[] = versionString.split('.').map(Number);
         if (numbers.some(isNaN)) {
             throw new Error("Invalid Version Number")
