@@ -40,6 +40,13 @@ describe('Config', () => {
         expect(collection.collectionName).toBe(collectionName);
     });
 
+    test('test set/getVersionData', async () => {
+        // Make sure we start with an empty collection
+        let result = await mongoIo.getVersionData();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(0);
+    });
+
     test('test set/getVersion', async () => {
         // Make sure we start with an empty collection
         let result = await db.collection("msmCurrentVersions").find().toArray();

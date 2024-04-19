@@ -1,5 +1,6 @@
-import { MongoIO } from './MongoIO';
 import { Config } from './Config';
+import { MongoIO } from './MongoIO';
+import { EJSON } from 'bson';
 
 
 describe('Config', () => {
@@ -69,5 +70,46 @@ describe('Config', () => {
 
     test('test bulkLoad', async () => {
         await expect(() => mongoIo.bulkLoad("foo", [])).rejects.toThrow("Database not connected");
+    });
+
+    test('test applySchemaValidationFail', async () => {
+        const testSchema = { "foo": "bar" };
+        await mongoIo.connect();
+        await expect(() => mongoIo.applySchemaValidation("test", testSchema)).rejects.toThrow("Parsing of collection validator failed");
+        await mongoIo.dropCollection("test");
+        await mongoIo.disconnect();
+    });
+
+    test('test addIndexsNone', async () => {
+        await mongoIo.connect();
+        expect(mongoIo.addIndexes("test", [])).resolves;
+        expect(mongoIo.addIndexes("test", [{}])).rejects.toThrow("Failed to add indexes:")
+        await mongoIo.dropCollection("test");
+        await mongoIo.disconnect();
+    });
+
+    test('test addIndexsInvalidFail', async () => {
+        const indexs = [{"name":"nameIndex","key":"InvalidKey"}];
+        await mongoIo.connect();
+        await mongoIo.getCollection("test");
+        await expect(() => mongoIo.addIndexes("test", indexs)).rejects.toThrow("Error in specification");
+        await mongoIo.dropCollection("test");
+        await mongoIo.disconnect();
+    });
+
+    test('test dropIndexesEmptyFail', async () => {
+        await mongoIo.connect();
+        await mongoIo.getCollection("test");
+        expect(mongoIo.dropIndexes("test", [])).resolves;
+        await mongoIo.dropCollection("test");
+        await mongoIo.disconnect();
+    });
+
+    test('test bulkLoadFial', async () => {
+        const data = ["foo"];
+        await mongoIo.connect();
+        await expect(() => mongoIo.bulkLoad("test", data)).rejects.toThrow("Cannot create property");
+        await mongoIo.dropCollection("test");
+        await mongoIo.disconnect();
     });
 });
