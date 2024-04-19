@@ -4,7 +4,7 @@ import { MongoIO } from '../config/MongoIO';
 import { Version } from './Version';
 import { VersionNumber } from './VersionNumber';
 
-jest.mock('../../src/config/Config', () => {
+jest.mock('../config/Config', () => {
     return {
         Config: jest.fn().mockImplementation(() => ({
             shouldLoadTestData: jest.fn().mockReturnValue(true),
@@ -12,31 +12,31 @@ jest.mock('../../src/config/Config', () => {
     };
 });
 
-jest.mock('../../src/config/MongoIO', () => {
+jest.mock('../config/MongoIO', () => {
     return {
         MongoIO: jest.fn().mockImplementation(() => ({
             clearSchemaValidation: jest.fn(),
             getSchema: jest.fn().mockReturnValue({"bsonType":"object","properties":{"name":{"description":"aDescription","msmType":"msmWord"}}}),
-            dropIndexes: jest.fn(),
-            executeAggregations: jest.fn(),
+            dropIndexes: jest.fn().mockResolvedValue(undefined),
+            executeAggregations: jest.fn().mockResolvedValue(undefined),
             addIndexes: jest.fn(),
             applySchemaValidation: jest.fn(),
-            bulkLoad: jest.fn(),
+            bulkLoad: jest.fn().mockResolvedValue(undefined),
             setVersion: jest.fn()
         }))
     };
 });
 
-jest.mock('../../src/config/FileIO', () => {
+jest.mock('../config/FileIO', () => {
     return {
         FileIO: jest.fn().mockImplementation(() => ({
-            saveSwagger: jest.fn(),
-            getTestData: jest.fn()
+            getTestData: jest.fn().mockReturnValue([{"foo":"bar"}]),
+            saveSwagger: jest.fn()
         }))
     };
 });
 
-jest.mock('../../src/models/Schema', () => {
+jest.mock('./Schema', () => {
     return {
         Schema: jest.fn().mockImplementation(() => ({
             getSwagger: jest.fn(),
@@ -66,15 +66,56 @@ describe('Version', () => {
         expect(theVersion.getThis().theSchema["properties"]["name"]["description"]).toBe("aDescription");
     });
 
-    test('test testData', () => {
+    test('test bulk load testData', async () => {
         const versionData = {
             "version": "1.0.0.0",
             "testData": "somefilename"
         };
         const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
-
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().testData).toBe("somefilename");
+
+        await theVersion.apply();
+        expect(mongoIO.bulkLoad).toHaveBeenCalledTimes(1);
+    });
+
+    test('test drop indexes', async () => {
+        const versionData = {
+            "version": "1.0.0.0",
+            "dropIndexes": ["one", "two"]
+        };
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
+        expect(theVersion.getThis().dropIndexes).toStrictEqual(["one", "two"]);
+
+        await theVersion.apply();
+        expect(mongoIO.dropIndexes).toHaveBeenCalledTimes(1);
+    });
+
+    test('test add indexes', async () => {
+        const versionData = {
+            "version": "1.0.0.0",
+            "addIndexes": ["one", "two"]
+        };
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
+        expect(theVersion.getThis().addIndexes).toStrictEqual(["one", "two"]);
+
+        await theVersion.apply();
+        expect(mongoIO.addIndexes).toHaveBeenCalledTimes(1);
+    });
+
+    test('test aggregations indexes', async () => {
+        const versionData = {
+            "version": "1.0.0.0",
+            "aggregations": ["one", "two"]
+        };
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
+        expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
+        expect(theVersion.getThis().aggregations).toStrictEqual(["one", "two"]);
+
+        await theVersion.apply();
+        expect(mongoIO.executeAggregations).toHaveBeenCalledTimes(1);
     });
 
     test('test dropIndexes', () => {

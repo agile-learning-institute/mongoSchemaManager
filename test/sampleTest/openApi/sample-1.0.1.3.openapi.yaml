@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: sample
+  version: 1.0.1.3
+paths:
+  /sample/:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sample'
+components:
+  schemas:
+    sample:
+      required:
+        - _id
+      properties:
+        _id:
+          description: The unique identifier for a person
+          type: string
+        name:
+          description: VERSION document only
+          pattern: ^[^\s]{0,32}$
+          type: string
+        version:
+          description: VERSION document only
+          pattern: ^[^\s]{0,32}$
+          type: string
+        userName:
+          description: Username
+          pattern: ^[^\s]{0,32}$
+          type: string
+        status:
+          description: The status
+          enum:
+            - Draft
+            - Active
+            - Archived
+          type: string
+        fullName:
+          description: The first and last name
+          properties:
+            firstName:
+              description: The persons first name
+              pattern: ^[^\s]{0,32}$
+              type: string
+            lastName:
+              description: The persons last name
+              pattern: ^[^\s]{0,32}$
+              type: string
+          additionalProperties: false
+          type: object
+        list:
+          description: A list for testing
+          items:
+            properties:
+              type:
+                description: A type of list object
+                enum:
+                  - radio
+                  - check
+                  - text
+                type: string
+              tags:
+                description: A list of enumerated values
+                items:
+                  enum:
+                    - User
+                    - Admin
+                    - Super
+                  type: string
+                type: array
+            type: object
+          type: array
+        eMail:
+          description: The person's eMail address
+          pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+          type: string
+        phone:
+          description: The person's phone number
+          pattern: ^\+?1?\s?(\([0-9]{3}\)|[0-9]{3})[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$
+          type: string
+        word:
+          description: A string with no white space
+          pattern: ^[^\s]{0,32}$
+          type: string
+        sentence:
+          description: A longer string that includes spaces
+          pattern: ^[ -~]{0,256}$
+          type: string
+        paragraph:
+          description: A paragraph (array of sentences)
+          items:
+            description: Sentences
+            pattern: ^[ -~]{0,256}$
+            type: string
+          type: array
+        lastSaved:
+          description: Tracking breadcrumb
+          properties:
+            fromIp:
+              description: Http Request remote IP address
+              pattern: >-
+                ^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$
+              type: string
+            byUser:
+              description: UUID Of User
+              type: string
+            atTime:
+              description: The date-time when last updated
+              type: string
+            correlationId:
+              description: The logging correlation ID of the update transaction
+              type: string
+          additionalProperties: false
+          type: object
+      additionalProperties: false
+      type: object
