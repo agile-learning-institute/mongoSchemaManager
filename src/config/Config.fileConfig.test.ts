@@ -1,6 +1,6 @@
 /**
  * This set of unit tests test config init from files
- * and uses the files in /test/resources/configTest
+ * and uses the files in /test/configTest
  */
 import { Config } from './Config';
 
@@ -9,7 +9,7 @@ describe('Config', () => {
 
     // Clear all mocks before each test
     beforeEach(() => {
-        process.env.CONFIG_FOLDER = "./test/resources/configTest";
+        process.env.CONFIG_FOLDER = "./test/configTest";
         config = new Config();
     });
 

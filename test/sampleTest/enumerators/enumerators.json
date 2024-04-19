@@ -1,0 +1,53 @@
+[
+    {
+        "name": "Enumerations",
+        "status": "Depricated",
+        "version": 0,
+        "enumerators": []
+    },
+    {
+        "name": "Enumerations",
+        "status": "Active",
+        "version": 1,
+        "enumerators": {
+            "defaultStatus": {
+                "Active":"Not Deleted",
+                "Archived":"Soft Delete Indicator"
+            }
+        }
+    },
+    {
+        "name": "Enumerations",
+        "status": "Active",
+        "version": 2,
+        "enumerators": {
+            "defaultStatus": {
+                "Draft":"Not finalized",
+                "Active":"Not deleted",
+                "Archived":"Soft delete indicator"
+            }
+        }
+    },
+    {
+        "name": "Enumerations",
+        "status": "Active",
+        "version": 3,
+        "enumerators": {
+            "defaultStatus": {
+                "Draft":"Not finalized",
+                "Active":"Not deleted",
+                "Archived":"Soft delete indicator"
+            },
+            "type": {
+                "radio": "Select one option",
+                "check": "Select multiple options",
+                "text": "Enter a text string"
+            },
+            "tags": {
+                "User": "A User",
+                "Admin": "An administrator",
+                "Super": "A super user"
+            }
+        }
+    }    
+]

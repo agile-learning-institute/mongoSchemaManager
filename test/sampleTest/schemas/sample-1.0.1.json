@@ -1,0 +1,74 @@
+{
+    "bsonType": "object",
+    "required": [
+        "_id"
+    ],
+    "properties": {
+        "_id": {
+            "description": "The unique identifier for a person",
+            "bsonType": "objectId"
+        },
+        "name": {
+            "description": "VERSION document only",
+            "msmType": "msmWord"
+        },
+        "version": {
+            "description": "VERSION document only",
+            "msmType": "msmWord"
+        },
+        "userName": {
+            "description": "Username",
+            "msmType": "msmWord"
+        },
+        "status": {
+            "description": "The status",
+            "msmEnums": "defaultStatus"
+        },
+        "fullName": {
+            "description": "The first and last name",
+            "msmType": "fullName"
+        },
+        "list": {
+            "description": "A list for testing",
+            "bsonType": "array",
+            "items": {
+                "bsonType": "object",
+                "properties": {
+                    "type": {
+                        "description": "A type of list object",
+                        "msmEnums": "type"
+                    },
+                    "tags": {
+                        "description": "A list of enumerated values",
+                        "msmEnumList": "tags"
+                    }
+                }
+            }
+        },
+        "eMail": {
+            "description": "The person's eMail address",
+            "msmType": "msmEmail"
+        },
+        "phone": {
+            "description": "The person's phone number",
+            "msmType": "msmUsaPhone"
+        },
+        "word": {
+            "description": "A string with no white space",
+            "msmType": "msmWord"
+        },
+        "sentence": {
+            "description": "A longer string that includes spaces",
+            "msmType": "msmSentence"
+        },
+        "paragraph": {
+            "description": "A paragraph (array of sentences)",
+            "msmType": "msmParagraph"
+        },
+        "lastSaved": {
+            "description": "Tracking breadcrumb",
+            "msmType": "msmBreadcrumb"
+        }
+    },
+    "additionalProperties": false
+}

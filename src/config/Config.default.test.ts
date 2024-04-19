@@ -2,7 +2,6 @@
  * This set of unit tests test config init from env
  */
 import { Config } from './Config';
-import { VersionNumber } from '../models/VersionNumber';
 
 describe('Config', () => {
     let config: Config;

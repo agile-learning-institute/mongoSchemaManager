@@ -1,22 +1,23 @@
 /**
  * NOTE: This set of unit tests uses the testing data 
- *       in the test/resources folder of this repo.
+ *       in the test/fileIOTest folder of this repo.
  */
 import { Config } from './Config';
 import { FileIO } from "./FileIO";
 import { VersionNumber } from '../models/VersionNumber';
 import { join } from 'path';
-import { unlinkSync, existsSync, readFileSync, statSync } from "fs";
+import { unlinkSync, existsSync, readFileSync, statSync, copyFileSync } from "fs";
 import * as yaml from 'js-yaml';
 
 describe('Config', () => {
     let config: Config;
     let fileIO: FileIO;
     let versionNumber = new VersionNumber("1.0.0.0");
+    let configFolder = "./test/fileIOTest"
 
     // Clear all mocks before each test
     beforeEach(() => {
-        process.env.CONFIG_FOLDER = "./test/resources";
+        process.env.CONFIG_FOLDER = configFolder;
         process.env.MSM_ROOT = "./src";
         config = new Config();
         fileIO = new FileIO(config);
@@ -27,23 +28,61 @@ describe('Config', () => {
     test('test attach files', () => {
         fileIO.attachFiles()
         expect(config.getEnums(1,"defaultStatus")).toStrictEqual({"Active":"Not Deleted","Archived":"Soft Delete Indicator"})
-        assertFolderExists("./src/msmTypes");
-        assertFolderExists("./test/resources");
-        assertFolderExists("./test/resources/collections");
-        assertFolderExists("./test/resources/schemas");
-        assertFolderExists("./test/resources/customTypes");
-        assertFolderExists("./test/resources/testData");
-        assertFolderExists("./test/resources/openApi");
+        expect(assertFolderExists("./src/msmTypes")).toBeTruthy();
+        assertFolderExists(join(configFolder, "resources"));
+        assertFolderExists(join(configFolder, "collections"));
+        assertFolderExists(join(configFolder, "schemas"));
+        assertFolderExists(join(configFolder, "customTypes"));
+        assertFolderExists(join(configFolder, "testData"));
+        assertFolderExists(join(configFolder, "openApi"));
 
-        function assertFolderExists(folderName: string) {
-            expect(existsSync(folderName)).toBeTruthy();
-            expect(statSync(folderName).isDirectory()).toBeTruthy();
+        function assertFolderExists(folderName: string): boolean {
+            return (
+                existsSync(folderName) && 
+                statSync(folderName).isDirectory()
+            );
         }
+    });
+
+    test('test create folder', async () => {
+        const folderName = join(configFolder, "openApi");
+        const fs = require('fs').promises;
+        await fs.rm(folderName, { recursive: true, force: true });
+
+        fileIO.attachFiles();
+        expect(existsSync(folderName)).toBeTruthy();
+        expect(statSync(folderName).isDirectory()).toBeTruthy();
+    });
+
+    test('test missing requred folder', async () => {
+        const folderName = join(configFolder, "schemas");
+        const backupFolder = "./test/sampleTest/schemas";
+        const fs = require('fs-extra');
+        await fs.rm(folderName, { recursive: true, force: true });
+
+        expect(() => fileIO.attachFiles()).toThrow("Folder does not exist! test/fileIOTest/schemas");
+
+        await fs.ensureDir(folderName);
+        await fs.copy(backupFolder, folderName);
+        expect(existsSync(folderName)).toBeTruthy();
+        expect(statSync(folderName).isDirectory()).toBeTruthy();
+    });
+
+    test('test missing enumerators', async () => {
+        const folderName = join(configFolder, "enumerators")
+        const fileName = join(folderName, "enumerators.json");
+        const backupFile = "./test/sampleTest/enumerators/enumerators.json";
+        try {unlinkSync(fileName);} catch (e) {}
+
+        expect(() => fileIO.attachFiles()).toThrow("Enumerations File does not exist! test/fileIOTest/enumerators/enumerators.json");
+
+        copyFileSync(backupFile, fileName);
+        expect(existsSync(fileName)).toBeTruthy();
     });
 
     test('test configureApp', () => {
         const versions = [{"collectionName":"foo", "currentVersion":"1.0.0.0"}];
-        const apiFolder = "./test/resources/openApi"
+        const apiFolder = "./test/fileIOTest/openApi"
         fileIO.configureApp(versions);
 
         expect(existsSync(join(apiFolder, "index.html"))).toBeTruthy();
