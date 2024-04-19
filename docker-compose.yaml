@@ -22,7 +22,7 @@ services:
       mongodb-server:
         condition: service_healthy
     volumes:
-    - ./test/resources:/opt/mongoSchemaManager/configurations
+    - ./test/sampleTest:/opt/mongoSchemaManager/configurations
     environment:
       CONNECTION_STRING: mongodb://root:example@mongodb-server:27017
       LOAD_TEST_DATA: "true"

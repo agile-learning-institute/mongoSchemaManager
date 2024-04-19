@@ -178,9 +178,6 @@ export class MongoIO {
         await this.getCollection(collectionName);
 
         const collections = await this.db.listCollections({ name: collectionName }, { nameOnly: false }).toArray();
-        if (collections.length != 1) {
-            throw new Error("getSchemaValidation could not find collection " + collectionName + collections);
-        }
         const validationRules = collections[0].options?.validator || {};
 
         return validationRules;
@@ -313,7 +310,7 @@ export class MongoIO {
      * @param collectionName 
      * @param data 
      */
-    public async bulkLoad(collectionName: string, data: any[]) {
+    public async bulkLoad(collectionName: string, data: any[]): Promise<void> {
         if (!this.db) {
             throw new Error("Database not connected");
         }
