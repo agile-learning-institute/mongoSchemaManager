@@ -1,39 +1,46 @@
 import { Config } from "./config/Config";
+import { FileIO } from "./config/FileIO";
+import { MongoIO } from "./config/MongoIO";
 import { Collection } from "./models/Collection";
 
 export class CollectionProcessor {
   private config: Config;
+  private mongoIO: MongoIO;
+  private fileIO: FileIO;
 
-  constructor(config: Config) {
+  constructor(config: Config, fileIO: FileIO, mongoIO: MongoIO) {
     this.config = config;
+    this.mongoIO = mongoIO;
+    this.fileIO = fileIO;
   }
 
   public async processCollections() {
     console.info("Starting configuration and collection processing...");
 
     try {
-      await this.config.connect();
-      this.config.attachFiles();
-      const collectionFiles = this.config.getCollectionFiles();
+      await this.mongoIO.connect();
+      this.fileIO.attachFiles();
+      const collectionFiles = this.fileIO.getCollectionFiles();
 
       // Process all collection files
       for (const fileName of collectionFiles) {
         console.info("Processing", fileName);
-        const collectionData = this.config.getCollectionConfig(fileName);
-        const theCollection = new Collection(this.config, collectionData);
+        const collectionData = this.fileIO.getCollectionConfig(fileName);
+        const theCollection = new Collection(this.config, this.mongoIO, this.fileIO, collectionData);
         await theCollection.processVersions();
       }
 
       // Write enumerators collection and Swagger Viewing app
-      await this.config.loadEnumerators();
-      await this.config.configureApp();
+      const versions = this.mongoIO.getVersionData();
+      await this.fileIO.configureApp(versions);
+      await this.mongoIO.bulkLoad("enumerators", this.config.getMsmEnumerators());
 
     } catch (e) {
       console.error(e);
-      await this.config.disconnect();
+      await this.mongoIO.disconnect();
       process.exit(1);
     } finally {
-      await this.config.disconnect();
+      await this.mongoIO.disconnect();
       console.log("Processing completed successfully!");
     }
   }
@@ -42,7 +49,8 @@ export class CollectionProcessor {
 // Usage
 (async () => {
   const config = new Config();
-  const processor = new CollectionProcessor(config);
+  const mongoIO = new MongoIO(config);
+  const fileIO = new FileIO(config);
+  const processor = new CollectionProcessor(config, fileIO, mongoIO);
   await processor.processCollections();
-  config.disconnect();
 })();
