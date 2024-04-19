@@ -1,13 +1,15 @@
 import { Config } from "../config/Config";
+import { FileIO } from "../config/FileIO";
 import { VersionNumber } from "./VersionNumber";
 
 /**
  * This class is responsible for pre-processing schema files
  */
 export class Schema {
+    private config: Config;
+    private fileIO: FileIO;
     private schema: any;
     private swagger: any;
-    private config: Config;
     private version: VersionNumber;
 
     /**
@@ -18,12 +20,13 @@ export class Schema {
      * @param collection The collection name
      * @param version The version of this schema to process
      */
-    constructor(config: Config, collection: string, version: VersionNumber) {
+    constructor(config: Config, fileIO: FileIO, collection: string, version: VersionNumber) {
         this.config = config;
+        this.fileIO = fileIO;
         this.version = version;
 
         // Build Schema and Preprocess
-        this.schema = this.config.getSchema(collection, version);
+        this.schema = this.fileIO.getSchema(collection, version);
         this.schema.properties = this.preProcess(this.schema.properties, "msmType", this.addType);
         this.schema.properties = this.preProcess(this.schema.properties, "msmEnums", this.addEnums);
         this.schema.properties = this.preProcess(this.schema.properties, "msmEnumList", this.addEnumList);
@@ -142,7 +145,7 @@ export class Schema {
      * @returns the property with type added
      */
     private addType = (property: any): any => {
-        const typeDefinition = this.config.getType(property.msmType);
+        const typeDefinition = this.fileIO.getType(property.msmType);
         Object.assign(property, typeDefinition);
 
         delete property.msmType;

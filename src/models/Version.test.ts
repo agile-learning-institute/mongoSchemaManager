@@ -1,28 +1,37 @@
 import { Config } from '../config/Config';
+import { FileIO } from '../config/FileIO';
+import { MongoIO } from '../config/MongoIO';
 import { Version } from './Version';
 import { VersionNumber } from './VersionNumber';
 
 jest.mock('../../src/config/Config', () => {
     return {
         Config: jest.fn().mockImplementation(() => ({
+            shouldLoadTestData: jest.fn().mockReturnValue(true),
+        }))
+    };
+});
+
+jest.mock('../../src/config/MongoIO', () => {
+    return {
+        MongoIO: jest.fn().mockImplementation(() => ({
             clearSchemaValidation: jest.fn(),
-            getSchema: jest.fn().mockReturnValue({
-                "bsonType": "object",
-                "properties": {
-                    "name": {
-                        "description": "aDescription",
-                        "msmType": "msmWord"
-                    }
-                }
-            }),
+            getSchema: jest.fn().mockReturnValue({"bsonType":"object","properties":{"name":{"description":"aDescription","msmType":"msmWord"}}}),
             dropIndexes: jest.fn(),
             executeAggregations: jest.fn(),
             addIndexes: jest.fn(),
             applySchemaValidation: jest.fn(),
-            shouldLoadTestData: jest.fn().mockReturnValue(true),
             bulkLoad: jest.fn(),
+            setVersion: jest.fn()
+        }))
+    };
+});
+
+jest.mock('../../src/config/FileIO', () => {
+    return {
+        FileIO: jest.fn().mockImplementation(() => ({
             saveSwagger: jest.fn(),
-            setVersion: jest.fn(),
+            getTestData: jest.fn()
         }))
     };
 });
@@ -31,31 +40,27 @@ jest.mock('../../src/models/Schema', () => {
     return {
         Schema: jest.fn().mockImplementation(() => ({
             getSwagger: jest.fn(),
-            getSchema: jest.fn().mockReturnValue({
-                "bsonType": "object",
-                "properties": {
-                    "name": {
-                        "description": "aDescription",
-                        "bsonType": "string",
-                    }
-                }
-            })
+            getSchema: jest.fn().mockReturnValue({"bsonType":"object","properties":{"name":{"description":"aDescription","bsonType":"string"}}})
         }))
     };
 });
 
 describe('Version', () => {
     let config: jest.Mocked<Config>;
+    let fileIO: jest.Mocked<FileIO>;
+    let mongoIO: jest.Mocked<MongoIO>;
     const expectedVersion = new VersionNumber("1.0.0.0");
 
     beforeEach(() => {
         jest.clearAllMocks();
         config = new Config() as jest.Mocked<Config>;
+        fileIO = new FileIO(config) as jest.Mocked<FileIO>;
+        mongoIO = new MongoIO(config) as jest.Mocked<MongoIO>;
     });
 
     test('test constructor simple', () => {
         const versionData = { "version": "1.0.0.0" };
-        const theVersion = new Version(config, "people", versionData);
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
 
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().theSchema["properties"]["name"]["description"]).toBe("aDescription");
@@ -66,7 +71,7 @@ describe('Version', () => {
             "version": "1.0.0.0",
             "testData": "somefilename"
         };
-        const theVersion = new Version(config, "people", versionData);
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
 
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().testData).toBe("somefilename");
@@ -77,7 +82,7 @@ describe('Version', () => {
             "version": "1.0.0.0",
             "dropIndexes": ["foo", "bar"]
         };
-        const theVersion = new Version(config, "people", versionData);
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
 
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().dropIndexes.length).toBe(2);
@@ -101,7 +106,7 @@ describe('Version', () => {
                 }
             ]
         };
-        const theVersion = new Version(config, "people", version);
+        const theVersion = new Version(config, mongoIO, fileIO, "people", version);
 
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().addIndexes.length).toBe(2);
@@ -125,7 +130,7 @@ describe('Version', () => {
                 ]
             ]
         };
-        const theVersion = new Version(config, "people", versionData);
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
 
         expect(theVersion.getVersion()).toStrictEqual(expectedVersion);
         expect(theVersion.getThis().aggregations.length).toBe(2);
@@ -135,12 +140,12 @@ describe('Version', () => {
 
     test('process should call saveSwagger', async () => {
         const versionData = { "version": "1.0.0.0" };
-        const theVersion = new Version(config, "people", versionData);
+        const theVersion = new Version(config, mongoIO, fileIO, "people", versionData);
         await theVersion.apply()
 
-        expect(config.clearSchemaValidation).toHaveBeenCalledTimes(1);
-        expect(config.applySchemaValidation).toHaveBeenCalledTimes(1);
-        expect(config.setVersion).toHaveBeenCalledTimes(1);
-        expect(config.saveSwagger).toHaveBeenCalledTimes(1);
+        expect(mongoIO.clearSchemaValidation).toHaveBeenCalledTimes(1);
+        expect(mongoIO.applySchemaValidation).toHaveBeenCalledTimes(1);
+        expect(mongoIO.setVersion).toHaveBeenCalledTimes(1);
+        expect(fileIO.saveSwagger).toHaveBeenCalledTimes(1);
     });
 });

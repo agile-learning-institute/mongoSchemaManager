@@ -5,9 +5,9 @@ import { EJSON } from 'bson';
 import { Config } from './Config';
 
 /**
- * Class ConfigMongo: This class implementes all mongodb i-o.
+ * Class MongoIO implementes all mongodb I-O.
  */
-export class ConfigMongo {
+export class MongoIO {
     private config: Config;
     private client?: MongoClient;
     private db?: Db;

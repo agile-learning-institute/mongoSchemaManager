@@ -1,13 +1,13 @@
+import { Config } from './Config';
 import { VersionNumber } from '../models/VersionNumber';
 import { writeFileSync, readdirSync, mkdirSync, existsSync, copyFileSync, readFileSync, statSync } from "fs";
 import { join } from 'path';
 import * as yaml from 'js-yaml';
-import { Config } from './Config';
 
 /**
- * Class Config File: abstracts all file I-O
+ * Class FileIO handles all File IO activities
  */
-export class ConfigFile {
+export class FileIO {
     private config: Config;
 
     /**

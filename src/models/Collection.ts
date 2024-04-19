@@ -1,4 +1,6 @@
 import { Config } from "../config/Config";
+import { FileIO } from "../config/FileIO";
+import { MongoIO } from "../config/MongoIO";
 import { Version } from "./Version"; 
 
 interface CollectionConfig {
@@ -11,6 +13,8 @@ interface CollectionConfig {
  */
 export class Collection {
     private config: Config;
+    private mongoIO: MongoIO;
+    private fileIO: FileIO;
     private collectionName: string;
     private versions: Version[] = [];
     private currentVersion: string = "";
@@ -23,12 +27,14 @@ export class Collection {
      * @param theConfig 
      * @param collectionConfig 
      */
-    constructor(theConfig: Config, collectionConfig: CollectionConfig) {
-        this.config = theConfig;
+    constructor(config: Config, mongoIO: MongoIO, fileIO: FileIO, collectionConfig: CollectionConfig) {
+        this.config = config;
+        this.mongoIO = mongoIO;
+        this.fileIO = fileIO;
         this.collectionName = collectionConfig.name;
         collectionConfig.versions.forEach(version => {
             console.info("Initilizing Version", this.collectionName, version.version)
-            this.versions.push(new Version(this.config, this.collectionName, version));
+            this.versions.push(new Version(this.config, mongoIO, fileIO, this.collectionName, version));
         });
     }
 
@@ -37,11 +43,11 @@ export class Collection {
      * is the core of how msm works.
      */
     public async processVersions() {
-        this.currentVersion = await this.config.getVersion(this.collectionName);
+        this.currentVersion = await this.mongoIO.getVersion(this.collectionName);
         for (const version of this.versions) {
             if (version.getVersion().isGreaterThan(this.currentVersion)) {
                 await version.apply();
-                this.currentVersion = await this.config.getVersion(this.collectionName);
+                this.currentVersion = await this.mongoIO.getVersion(this.collectionName);
             }
         }
     }

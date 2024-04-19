@@ -1,20 +1,36 @@
 import { Config } from './config/Config';
 import { Collection } from './models/Collection';
 import { CollectionProcessor } from './CollectionProcessor';
+import { FileIO } from './config/FileIO';
+import { MongoIO } from './config/MongoIO';
 
 jest.mock('./config/Config', () => {
   return {
     Config: jest.fn().mockImplementation(() => ({
-      attachFiles: jest.fn(),
-      configureApp: jest.fn(),
+      getMsmEnumerators: jest.fn()
+    }))
+  };
+});
+
+jest.mock('./config/MongoIO', () => {
+  return {
+    MongoIO: jest.fn().mockImplementation(() => ({
       connect: jest.fn(),
+      getVersionData: jest.fn(),
       disconnect: jest.fn(),
-      getCollectionFiles: jest.fn().mockReturnValue(['collection1.json', 'collection2.json']),
-      getCollectionConfig: jest.fn().mockImplementation((fileName) => ({
-        collectionName: fileName.split('.')[0], // Mocked implementation example
-        versions: [], // Simplified mock data
-      })),
-    })),
+      bulkLoad: jest.fn()
+    }))
+  };
+});
+
+jest.mock('./config/FileIO', () => {
+  return {
+    FileIO: jest.fn().mockImplementation(() => ({
+      attachFiles: jest.fn(),
+      getCollectionFiles: jest.fn().mockReturnValue(["one", "two"]),
+      configureApp: jest.fn(),
+      getCollectionConfig: jest.fn()
+    }))
   };
 });
 
@@ -27,25 +43,27 @@ jest.mock('./models/Collection', () => {
 });
 
 describe('CollectionProcessor', () => {
-  let config: Config;
+  let config: jest.Mocked<Config>;
+  let fileIO: jest.Mocked<FileIO>;
+  let mongoIO: jest.Mocked<MongoIO>;
   let processor: CollectionProcessor;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    config = new Config();
-    processor = new CollectionProcessor(config);
+    config = new Config() as jest.Mocked<Config>;
+    fileIO = new FileIO(config) as jest.Mocked<FileIO>;
+    mongoIO = new MongoIO(config) as jest.Mocked<MongoIO>;
+    processor = new CollectionProcessor(config, fileIO, mongoIO);
   });
 
   it('should process collections correctly', async () => {
     await processor.processCollections();
 
-    expect(config.connect).toHaveBeenCalledTimes(1);
-    expect(config.getCollectionFiles).toHaveBeenCalledTimes(1);
-    expect(config.getCollectionConfig).toHaveBeenCalledTimes(2); 
-    expect(config.disconnect).toHaveBeenCalledTimes(1);
-    expect(config.loadEnumerators).toHaveBeenCalledTimes(1);
-    expect(config.configureApp).toHaveBeenCalledTimes(1);
+    expect(mongoIO.connect).toHaveBeenCalledTimes(1);
+    expect(fileIO.getCollectionFiles).toHaveBeenCalledTimes(1);
+    expect(fileIO.getCollectionConfig).toHaveBeenCalledTimes(2);
+    expect(mongoIO.disconnect).toHaveBeenCalledTimes(1);
+    expect(fileIO.configureApp).toHaveBeenCalledTimes(1);
 
     expect(Collection).toHaveBeenCalledTimes(2);
   });

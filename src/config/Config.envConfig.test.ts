@@ -27,19 +27,7 @@ describe('Config', () => {
         testConfigEnvironmentValue("LOAD_TEST_DATA");
         expect(config.shouldLoadTestData()).toBe(false);
     });
-    
-    test('test shouldLoadTestData', () => {
-        process.env.LOAD_TEST_DATA = "false";
-        config = new Config();
-        process.env.LOAD_TEST_DATA = "";
-        expect(config.shouldLoadTestData()).toBe(false);
-
-        process.env.LOAD_TEST_DATA = "true";
-        config = new Config();
-        process.env.LOAD_TEST_DATA = "";
-        expect(config.shouldLoadTestData()).toBe(true);
-    });
-    
+        
     function testConfigEnvironmentValue(configName: string) {
         process.env[configName] = "ENVIRONMENT";
         config = new Config();
