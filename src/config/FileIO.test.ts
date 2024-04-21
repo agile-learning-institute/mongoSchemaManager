@@ -109,10 +109,20 @@ describe('Config', () => {
         expect(fileIO.getTestData("sample-1.0.0.1")[0].userName).toBe("Jane Doe");
     });
 
-    test('test getType', () => {
+    test('test getType custom', () => {
         const type = fileIO.getType("fullName");
         expect(type.bsonType).toBe("object");
     });
+
+    test('test getType msm', () => {
+        const type = fileIO.getType("msmWord");
+        expect(type.bsonType).toBe("string");
+    });
+
+    test('test getType error', () => {
+        expect(() => fileIO.getType("XYZ")).toThrow("Type Not Found:src/msmTypes/XYZ.json");
+    });
+
 
     test('test readEnumeratorsFile', () => {
         const enumerators = fileIO.readEnumeratorsFile();

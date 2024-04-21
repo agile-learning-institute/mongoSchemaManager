@@ -31,12 +31,17 @@ export class CollectionProcessor {
       }
 
       // Write enumerators collection and Swagger Viewing app
-      const versions = this.mongoIO.getVersionData();
-      await this.fileIO.configureApp(versions);
       await this.mongoIO.bulkLoad("enumerators", this.config.getMsmEnumerators());
+      console.info("Enumerators Loaded:", JSON.stringify(this.config.getMsmEnumerators()));
+
+      // Deploy the swagger viewer application
+      const versions = await this.mongoIO.getVersionData();
+      await this.fileIO.configureApp(versions);
+      console.info("App Deployed, Versions:", JSON.stringify(versions));
+
 
     } catch (e) {
-      console.error(e);
+      console.info(e);
       await this.mongoIO.disconnect();
       process.exit(1);
     } finally {
