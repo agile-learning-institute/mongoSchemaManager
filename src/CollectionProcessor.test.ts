@@ -34,10 +34,11 @@ jest.mock('./config/FileIO', () => {
   };
 });
 
+const processVersionsMock = jest.fn().mockResolvedValue(undefined);
 jest.mock('./models/Collection', () => {
   return {
     Collection: jest.fn().mockImplementation(() => ({
-      processVersions: jest.fn().mockResolvedValue(undefined),
+      processVersions: processVersionsMock
     })),
   };
 });
@@ -62,10 +63,26 @@ describe('CollectionProcessor', () => {
     expect(mongoIO.connect).toHaveBeenCalledTimes(1);
     expect(fileIO.getCollectionFiles).toHaveBeenCalledTimes(1);
     expect(fileIO.getCollectionConfig).toHaveBeenCalledTimes(2);
+    expect(processVersionsMock).toHaveBeenCalledTimes(2);
+    expect(mongoIO.bulkLoad).toHaveBeenCalledTimes(1);
+    expect(config.getMsmEnumerators).toHaveBeenCalledTimes(2);
+    expect(mongoIO.getVersionData).toHaveBeenCalledTimes(1);
+    expect(fileIO.configureApp).toHaveBeenCalledTimes(1);
     expect(mongoIO.disconnect).toHaveBeenCalledTimes(1);
     expect(fileIO.configureApp).toHaveBeenCalledTimes(1);
 
     expect(Collection).toHaveBeenCalledTimes(2);
   });
 
+  it('should handle errors gracefully', async () => {
+    let originalExit = process.exit;
+    process.exit = jest.fn() as unknown as (code?: number) => never;
+    processVersionsMock.mockRejectedValue(new Error("Error Thrown"));
+
+    await processor.processCollections();
+    expect(process.exit).toHaveBeenCalledTimes(1);
+    expect(process.exit).toHaveBeenCalledWith(1);
+    expect(mongoIO.disconnect).toHaveBeenCalled();
+    process.exit = originalExit;
+  });
 });

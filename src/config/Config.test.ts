@@ -19,6 +19,11 @@ describe('Config', () => {
         expect(() => config.getEnums(0, "bad")).toThrow("Enumerator does not exist:bad");
     });    
 
+    test('test badEnums error', () => {
+        config.setEnumerators([{"name":"Enumerations","status":"Active","version":1,"enumerators":{"foo":{"bar":"Bar Test","bat":"Bat Test"}}}]);
+        expect(() => config.getEnums(0, "status")).toThrow("Invalid Enumerators File bad version number sequence");
+    });    
+
     test('test getEnumerators', () => {
         const testData = [{"name":"Enumerations","status":"Active","version":0,"enumerators":{"foo":{"bar":"Bar Test","bat":"Bat Test"}}}];
         config.setEnumerators(testData);

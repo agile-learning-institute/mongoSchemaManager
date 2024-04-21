@@ -41,8 +41,8 @@ describe('VersionNumber', () => {
 
         var v1111 = new VersionNumber("1.1.1.1");
         var v1112 = new VersionNumber("1.1.1.2");
-        expect(v111.isGreaterThan("1.1.1.2")).toBeFalsy();
-        expect(v112.isGreaterThan("1.1.1.1")).toBeTruthy();
+        expect(v1111.isGreaterThan("1.1.1.2")).toBeFalsy();
+        expect(v1112.isGreaterThan("1.1.1.1")).toBeTruthy();
     });
 
 });

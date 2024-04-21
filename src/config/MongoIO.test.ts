@@ -45,6 +45,14 @@ describe('Config', () => {
         let result = await mongoIo.getVersionData();
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBe(0);
+
+        await mongoIo.setVersion(collectionName, "1.2.3.4");
+        result = await mongoIo.getVersionData();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(1);
+        expect(result[0].collectionName).toBe(collectionName);
+        expect(result[0].currentVersion).toBe("1.2.3.4");
+
     });
 
     test('test set/getVersion', async () => {
