@@ -61,7 +61,7 @@ export class FileIO {
      * - Copy this.msmRootFolder + /app to this.getOpenApiFolder
      * - Write all documents from msmVersions folder to versions.json
      */
-    public async configureApp(versions: any) {
+    public configureApp(versions: any) {
         const appFile = join(this.config.getMsmRootFolder(), "app", "index.html");
         const targetFile = join(this.config.getOpenApiFolder(), "index.html");
         copyFileSync(appFile, targetFile);
