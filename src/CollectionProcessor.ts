@@ -36,7 +36,7 @@ export class CollectionProcessor {
 
       // Deploy the swagger viewer application
       const versions = await this.mongoIO.getVersionData();
-      await this.fileIO.configureApp(versions);
+      this.fileIO.configureApp(versions);
       console.info("App Deployed, Versions:", JSON.stringify(versions));
 
 
