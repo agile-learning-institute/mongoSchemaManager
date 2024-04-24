@@ -3,7 +3,7 @@
 	"properties": {
 		"fromIp": {
 			"description": "Http Request remote IP address",
-			"msmType": "msmIpv4"
+			"bsonType": "string"
 		},
 		"byUser": {
 			"description": "UUID Of User",
