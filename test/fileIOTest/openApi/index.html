@@ -4,10 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Development Contracts</title>
+    <!-- Include Swagger UI CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.5/swagger-ui.min.css" />
 </head>
 <body>
     <h1>mongoSchemaManager</h1>
-    <p>Swagger Selector Goes Here</p>
-    <p>Swagger Viewer Goes Here</p>
+    
+    <!-- Add a container for Swagger Selector -->
+    <select id="collection-selector"></select>
+    
+    <!-- Add a container for Swagger Viewer -->
+    <div id="swagger-viewer"></div>
+
+    <!-- Include Swagger UI JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.5/swagger-ui-bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.5/swagger-ui-standalone-preset.js"></script>
+
+    <!-- Initialize Swagger UI -->
+    <script>
+        // Parse the JSON data from versions.json
+        const versionsData = [{"_id":"662565211473a75cfcadbd19","collectionName":"sample","currentVersion":"1.0.1.3"},{"_id":"662565211473a75cfcadbd3d","collectionName":"test","currentVersion":"1.0.0.0"}];
+
+        // Function to populate the collection selector
+        function populateSelector() {
+            const selector = document.getElementById('collection-selector');
+
+            // Loop through the data and create options for each collection
+            versionsData.forEach(collection => {
+                const option = document.createElement('option');
+                option.text = collection.collectionName;
+                option.value = collection._id; // You might want to use a unique identifier here
+                selector.add(option);
+            });
+        }
+
+        // Call the function to populate the selector
+        populateSelector();
+    </script>
 </body>
 </html>

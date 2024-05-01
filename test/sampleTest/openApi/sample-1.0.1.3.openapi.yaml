@@ -21,14 +21,6 @@ components:
         _id:
           description: The unique identifier for a person
           type: string
-        name:
-          description: VERSION document only
-          pattern: ^[^\s]{0,32}$
-          type: string
-        version:
-          description: VERSION document only
-          pattern: ^[^\s]{0,32}$
-          type: string
         userName:
           description: Username
           pattern: ^[^\s]{0,32}$
