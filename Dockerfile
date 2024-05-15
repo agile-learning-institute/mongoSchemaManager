@@ -1,5 +1,5 @@
 # Build stage
-FROM node:16 AS build
+FROM node:20 AS build
 
 # Install dependencies
 WORKDIR /app
@@ -17,7 +17,7 @@ RUN DATE=$(date "+%Y-%m-%d:%H:%M:%S") && \
     echo $DATE > dist/BUILT_AT
 
 # Final Stage
-FROM node:16 AS run
+FROM node:20 AS run
 
 # Default Environment Variable config values
 # ENV CONNECTION_STRING=mongodb://root:example@localhost:27017
