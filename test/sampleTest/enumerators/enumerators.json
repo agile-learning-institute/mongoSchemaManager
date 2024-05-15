@@ -1,7 +1,7 @@
 [
     {
         "name": "Enumerations",
-        "status": "Depricated",
+        "status": "Deprecated",
         "version": 0,
         "enumerators": []
     },
@@ -11,8 +11,8 @@
         "version": 1,
         "enumerators": {
             "defaultStatus": {
-                "Active":"Not Deleted",
-                "Archived":"Soft Delete Indicator"
+                "Active": "Not Deleted",
+                "Archived": "Soft Delete Indicator"
             }
         }
     },
@@ -22,9 +22,9 @@
         "version": 2,
         "enumerators": {
             "defaultStatus": {
-                "Draft":"Not finalized",
-                "Active":"Not deleted",
-                "Archived":"Soft delete indicator"
+                "Draft": "Not finalized",
+                "Active": "Not deleted",
+                "Archived": "Soft delete indicator"
             }
         }
     },
@@ -34,9 +34,9 @@
         "version": 3,
         "enumerators": {
             "defaultStatus": {
-                "Draft":"Not finalized",
-                "Active":"Not deleted",
-                "Archived":"Soft delete indicator"
+                "Draft": "Not finalized",
+                "Active": "Not deleted",
+                "Archived": "Soft delete indicator"
             },
             "type": {
                 "radio": "Select one option",
@@ -49,5 +49,5 @@
                 "Super": "A super user"
             }
         }
-    }    
+    }
 ]
