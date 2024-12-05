@@ -23,7 +23,7 @@ npm run start
 ```
 
 ## Test Container Locally
-To build the container, run a fresh mongoDb instance, and run the container using ``test/resrouces`` folder
+To build the container, run a fresh mongoDb instance, and run the container using ``test/resources`` folder
 ```bash
 npm run container
 ```

@@ -31,7 +31,7 @@ export class CollectionProcessor {
       }
 
       // Write enumerators collection and Swagger Viewing app
-      await this.mongoIO.bulkLoad("enumerators", this.config.getMsmEnumerators());
+      await this.mongoIO.upsertEnumerators(this.config.getMsmEnumerators());
       console.info("Enumerators Loaded:", JSON.stringify(this.config.getMsmEnumerators()));
 
       // Deploy the swagger viewer application

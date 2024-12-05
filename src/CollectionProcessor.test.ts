@@ -18,7 +18,8 @@ jest.mock('./config/MongoIO', () => {
       connect: jest.fn(),
       getVersionData: jest.fn(),
       disconnect: jest.fn(),
-      bulkLoad: jest.fn()
+      bulkLoad: jest.fn(),
+      upsertEnumerators: jest.fn()
     }))
   };
 });
@@ -64,7 +65,7 @@ describe('CollectionProcessor', () => {
     expect(fileIO.getCollectionFiles).toHaveBeenCalledTimes(1);
     expect(fileIO.getCollectionConfig).toHaveBeenCalledTimes(2);
     expect(processVersionsMock).toHaveBeenCalledTimes(2);
-    expect(mongoIO.bulkLoad).toHaveBeenCalledTimes(1);
+    expect(mongoIO.upsertEnumerators).toHaveBeenCalledTimes(1);
     expect(config.getMsmEnumerators).toHaveBeenCalledTimes(2);
     expect(mongoIO.getVersionData).toHaveBeenCalledTimes(1);
     expect(fileIO.configureApp).toHaveBeenCalledTimes(1);
