@@ -151,4 +151,31 @@ describe('Config', () => {
         expect(result[2].firstName).toBe("Bab");
     });
 
+    test('test upsertEnumerators', async () => {
+        let testData: any[] = [
+            {"name":"Enumerations","status":"Deprecated","version":0,"enumerators":{}},
+            {"name":"Enumerations","status":"Active","version":1,"enumerators":{"defaultStatus":{"Active":"Not Deleted","Archived":"Soft Delete Indicator"}}}
+        ];
+        await mongoIo.upsertEnumerators(testData);
+        let result = await db.collection("enumerators").find().toArray();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(2);
+        expect(result[0].status).toBe("Deprecated");
+        expect(result[1].status).toBe("Active");
+        expect(result[1].enumerators.defaultStatus).toHaveProperty("Active");
+
+        testData = [
+            {"name":"Enumerations","status":"Deprecated","version":0,"enumerators":{}},
+            {"name":"Enumerations","status":"Active","version":1,"enumerators":{"defaultStatus":{"Draft":"Not Deleted","Archived":"Soft Delete Indicator"}}}
+        ];
+        await mongoIo.upsertEnumerators(testData);
+        result = await db.collection("enumerators").find().toArray();
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(2);
+        expect(result[0].status).toBe("Deprecated");
+        expect(result[1].status).toBe("Active");
+        expect(result[1].enumerators.defaultStatus).toHaveProperty("Draft");
+    });
+
+
 });

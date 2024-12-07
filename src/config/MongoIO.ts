@@ -21,9 +21,9 @@ export class MongoIO {
         this.config = config;
     }
 
-     /**
-     * Connect to the Mongo Database
-     */
+    /**
+    * Connect to the Mongo Database
+    */
     public async connect(): Promise<void> {
         const connectionString = this.config.getConnectionString();
         const dbName = this.config.getDbName();
@@ -300,7 +300,7 @@ export class MongoIO {
         for (const aggregation of aggregations) {
             const result = await collection.aggregate(aggregation).toArray();
             console.info("Executed:", JSON.stringify(aggregations));
-            console.info( "Result:", JSON.stringify(result));
+            console.info("Result:", JSON.stringify(result));
         }
     }
 
@@ -314,14 +314,49 @@ export class MongoIO {
         if (!this.db) {
             throw new Error("Database not connected");
         }
-        
+
         try {
             const collection = await this.getCollection(collectionName);
             const result = await collection.insertMany(EJSON.deserialize(data));
             console.info("Bulk load successfully loaded", result.insertedCount, "documents");
         } catch (error) {
             console.error("Failed to perform bulk load:", error);
-            throw error; 
+            throw error;
+        }
+    }
+
+    /**
+     * bulk upsert the provided enumerators data to the specified collection
+     * 
+     * @param data 
+     */
+    public async upsertEnumerators(data: any[]): Promise<void> {
+        if (!this.db) {
+            throw new Error("Database not connected");
+        }
+
+        try {
+            const collection = await this.getCollection("enumerators");
+
+            // Prepare bulkWrite operations
+            const bulkOperations = data.map((doc: any) => {
+                const filter = { name: doc.name, version: doc.version }; // Match based on name and version
+                const update = { $set: doc }; // Update the full document fields
+                return { updateOne: { filter, update, upsert: true } };
+            });
+
+            // Perform bulkWrite with upserts
+            const result = await collection.bulkWrite(bulkOperations);
+            console.info(
+                "Bulk upsert successfully completed",
+                result.modifiedCount,
+                "documents modified and",
+                result.upsertedCount,
+                "documents upserted"
+            );
+        } catch (error) {
+            console.error("Failed to perform bulk upsert:", error);
+            throw error;
         }
     }
 }
